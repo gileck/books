@@ -1,0 +1,13 @@
+{
+    "short_name": "Training Plan",
+    "name": "Training Plan",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone"
+}

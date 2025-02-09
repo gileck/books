@@ -1,0 +1,48 @@
+// Import the Google Cloud client library
+const textToSpeech = require('@google-cloud/text-to-speech');
+const fs = require('fs');
+const util = require('util');
+const path = require('path');
+
+
+
+
+const keyBase64 = "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiY29udGludWFsLXZvaWNlLTExMDkwOCIsCiAgInByaXZhdGVfa2V5X2lkIjogIjU0NGFhZmM0NDExMGU3N2MyMDBiMTk2M2VjNzEyMTdlMzI5YTM4YmMiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQ29CZjlFK3dSaTk3MitcbmdMTVVmTUJydXNCcXFKb0pSUHJ6UkFpNDNuNGVmd0dHWlNiQkxCYUxDZ1d4Y0NKRUpoTTl0RzQxbDEyNVdaREhcbmNGeGpUbWRrME1mWm9MRno4S2Vwc095d2d5YUIzeUVvcHdFU2RKNnJHUW1DZ09aMjZ4SkRyc1hJUzFyVVpKZ09cbk5jUjJwTXZmRnhzUGsyZlpJblZ2VmlBKzBTMFJ2TGd5OExBOGdUNmUzUlI1bXZxeFRMVmpUZ056TWdjZlkycFFcbnNKZjhsa0pXUWJxaFJ6RENXcmFyUXJBRm5TdWZDbFE4bmIrV1NSWVVMUG9tRyt0SWNkaUw5anJ2S0QrMmZQdlRcbmdqM1FndXlyNkhwWUxTWnZ2b2U4Y3cwcDdUL1JLSWV0L0RaUHVoVkdCVVByZHFoYVVqazlJeTZJNUl6bmxEQUVcbkF3eHYrSjJ6QWdNQkFBRUNnZ0VBQU5Obyt4c0NOanBtWnU0WmtkVjlwNm5rOGRIejdmSzcwdGpxSUE5YWYwcHdcbmVDZERFMWtubi80TzhhdU40SnF5TEVDL3YrdWpLaGdTUmtwbjd3NnJUNDRnUlZVdjFlckRDVDNDRnRZQlVCT2VcblFwcDZJdG1nK09JWGplVXhqWHNwWVorbUxFdUV4N09NTEk2VE9jWlJMOXFKQmUwL3Nsb0NsN1VVL0ZFQ2ZEM1lcbmswU2ROVmtSeHpRMHhUbm5iTHpDV2JQTllvbzRSSnlyczFsWlQyajNrR2FxYVZwVUM1TmpEMnd4RG16NHZWeGxcbnoxR2RLZmRKRjJBQVlMaVlJS2Z5RkJGNStFNU8wNDlINkd1dTUxdlNiTlgzelRDUXlTRFJCSk1DbmhvcitTdFRcbnJtMzQ0TWtOUG1iZlpsZVFncHovTW4wSDd2WEVmZm9jYUorRkZKUmlqUUtCZ1FEbWdJRjVhNm4wc1NUZ1dTTVRcbnFpem9ZREZlUHBrbHRYZlNhdWJsaGxQWHZSdWlLb2xGd1RMWFlubmQ2L05yYzYxK1Zta1VLQzd4TmhacmdpV1BcblhrN1lqcitKc1VqajBORmZFMlBRaFhIdlVucW1JQng1RzdCTVJVc3FyQzR0ZFZPbExrZ2JGclJlTG5QbDZiWUZcbkIzZkNQRS92NjVzcnl3bWxIckJ1VUc1d1h3S0JnUUM2bkMraWN5OEc4NFVlQitxdGMyQnowbXh6R3ZYcXIrem1cblg1YlRvdC9EOVZsSU9LVnB4cjRscHJZNnh3bVBtT25XM2hPcWlZdGFLVzR4MzYyYVlZanNZcXpTallaN2R2QzJcbm5ESWJkKzNsN3hXNXpDS0c1NkNsY2g5OXJKMWZXanBqT0NnUjZiQXZtc2l4R0tPUzQ4VmhxUFh5citoUmI4RDlcbkFBVjN0SnBETFFLQmdRRGxpT1psOFU3SGVuZk1hVGRDNTkzY2NaMzN5Y0pjQ0wrUGJDRU9RNXZPWkdUV01pR01cbnN2MWIrcFo4NWUvNityQ3o5SHlqTS9pNi95K0lVNHZ2bnV4SlBxMkNBbWNoWmRwNUlTZnVpRlNUQzhGVEdQc0JcbnB3OENoS1o3a2daU0Fsb1BUVzFFZkhHVXNCRjl6Q1FVRWdHeURMbFZvM3RjT3M0Wi9kdVhuc1M3WlFLQmdEdmhcbmZvK2Njb3pDZkFiazkzTnRRSmdwLzg3MzZjM0RZanVTbE8yWXFFRlRhN0QzTEcxQzd5VloxOFFJdHBLenVPWFFcbklYTnA2Nk9sQTgxUlAzMzRxbDFnVktERDlWR05HelVkN2g1T1g3S1hBOXU1RzZNNmxKeENnTVJ0TFpxNWMxNy9cbldDeFhWc2dQM1RLbSsyWlpYSzgzN3FSUHVqYlhxNUFELzcwbjRSQ0pBb0dBV0t2Z1Z0UWVOTHVFaGphMnNBNmJcbnJpMG84d1daZ3JERi9RRGJHa1Z0L204am1GWkd6azMxVW5tRFlTNVhTZ3FQeTU0YTB4cVVhZ0hVYVR2S1gzNkFcbmNkTUNHVzlTL0p5MG5wT0xUUTB4eFUvVnFrVnJPNGVZVXBuUkhVNlQwMzlzcDVNYnF3d2l6blF1cTdWNFpmOTRcbjhTY1l5OUFnVkVYL1JpaXF4UThPYlQ4PVxuLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLVxuIiwKICAiY2xpZW50X2VtYWlsIjogImJvb2tzLTU2M0Bjb250aW51YWwtdm9pY2UtMTEwOTA4LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogIjEwODY1MjU0Nzk4MTI2ODczMDMyNSIsCiAgImF1dGhfdXJpIjogImh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwKICAidG9rZW5fdXJpIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwKICAiYXV0aF9wcm92aWRlcl94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL29hdXRoMi92MS9jZXJ0cyIsCiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3JvYm90L3YxL21ldGFkYXRhL3g1MDkvYm9va3MtNTYzJTQwY29udGludWFsLXZvaWNlLTExMDkwOC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsCiAgInVuaXZlcnNlX2RvbWFpbiI6ICJnb29nbGVhcGlzLmNvbSIKfQ=="
+const credentials = JSON.parse(Buffer.from(keyBase64, 'base64').toString('utf-8'));
+
+
+
+
+// Creates a client
+const client = new textToSpeech.TextToSpeechClient({
+    credentials
+});
+
+async function synthesizeSpeech(text) {
+    const request = {
+        input: { text: "Hey" },
+        voice: {
+            languageCode: 'en-US',
+            name: 'en-US-Standard-F'
+        },
+        audioConfig: { audioEncoding: 'MP3' },
+    };
+
+    // Performs the text-to-speech request
+    const [response] = await client.synthesizeSpeech(request);
+
+    // Assuming 'response.audioContent' contains the audio data in base64 format
+    const audioContent = response.audioContent;
+
+    // Create a Blob from the base64 audio content
+    // const audioBlob = new Blob([Uint8Array.from(atob(audioContent), c => c.charCodeAt(0))], { type: 'audio/mp3' });
+
+    // Create a URL for the Blob
+    // const audioUrl = URL.createObjectURL(audioBlob);
+
+    // Return the audio URL
+    return audioContent;
+}
+
+synthesizeSpeech();
+
