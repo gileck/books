@@ -39,8 +39,11 @@ export function Main() {
     const [audioChunks, setAudioChunks] = useState({});
     // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
     const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
-    const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({});
-    const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] || 0
+    const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({
+        [currentChapterIndex]: getConfig('currentChunkIndex') || 0
+    });
+    const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0
+    // console.log({ currentChunkIndex });
     const setCurrentChunkIndex = (index) => {
         setCurrentChunkIndexByChapter(prev => ({
             ...prev,
@@ -53,7 +56,7 @@ export function Main() {
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
 
     useEffect(() => {
-        // setCurrentChunkIndex(0)
+        setCurrentChunkIndex(currentChunkIndexByChapter[currentChapterIndex] || 0)
         setAudioChunks({})
     }, [currentChapterIndex])
 
