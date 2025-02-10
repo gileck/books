@@ -84,6 +84,8 @@ export function Main() {
         shouldUsecache: false
     })
 
+    const didImagesLoaded = images && Object.keys(images).length > 0;
+
 
 
 

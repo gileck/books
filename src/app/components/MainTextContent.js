@@ -90,6 +90,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
         return 'transparent';
     }
+    const didImagesLoaded = images && Object.keys(images).length > 0;
 
     const renderWords = (text, chunkIndex) =>
         text.split(' ')
@@ -130,7 +131,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                 <div key={chunkIndex} id={`chunk-${chunkIndex}`}>
 
                     {
-                        text.startsWith('Image ') ? <ImageBox text={text} images={images} render={() => renderWords(text, chunkIndex)} /> : renderWords(text, chunkIndex)
+                        text.startsWith('Image ') && didImagesLoaded ? <ImageBox text={text} images={images} render={() => renderWords(text, chunkIndex)} /> : renderWords(text, chunkIndex)
                     }
                 </div>
 
