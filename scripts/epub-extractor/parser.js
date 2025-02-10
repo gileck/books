@@ -87,9 +87,9 @@ function combineIncompleteSentences(lines) {
 function combineIncompleteSentencesInternal(lines, shouldRunOnImages) {
 
     for (let i = 0; i < lines.length; i++) {
-        const arrayOfLineEndings = ['.', ';', ':', '!', '?', ')', ']', '}', "'", "”"];
+        const arrayOfLineEndings = ['.', ';', ':', '!', '?', ']', '}'];
         const isEndsWithCapitalLetter = /[A-Z]$/.test(lines[i]);
-        const isEndsWithNumber = /\d$/.test(lines[i]);
+        // const isEndsWithNumber = /\d$/.test(lines[i]);
         const isNOTEndsWithCaracterArray = arrayOfLineEndings.every(ending => !lines[i].endsWith(ending))
         const isEmpty = lines[i].length === 0;
         const isEndsWithSlash = lines[i].endsWith('-');
@@ -108,6 +108,7 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages) {
         // const lastWordDoesDoesNotStartWithCapitalLetter = !/^[A-Z]/.test(lines[i].split(' ').pop());
         //sentence does not start with a number
         const sentenceDoesNotStartWithANumber = !/^\d:/.test(lines[i]);
+        const sentenceDoesNotStartWithImage = !lines[i].startsWith('Image ');
 
         // if (isEndsWithSlash) {
         //     console.log("---");
@@ -125,13 +126,13 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages) {
 
         // });
 
-        if (isEndsWithSlash || (sentenceHasAtLeastThreeWords && sentenceDoesNotStartWithANumber && !isEndsWithCapitalLetter && !isEndsWithNumber && isNOTEndsWithCaracterArray && !isEmpty)) {
-            console.log("Line without ending: ", lines[i]);
+        if (isEndsWithSlash || (sentenceHasAtLeastThreeWords && sentenceDoesNotStartWithANumber && !isEndsWithCapitalLetter && isNOTEndsWithCaracterArray && !isEmpty)) {
+            // console.log("Line without ending: ", lines[i]);
 
             for (let j = 1; j <= 10 && i + j < lines.length; j++) {
                 // small letter or any of this characters: (
-                if (/^[a-z]|\(/.test(lines[i + j])) {
-                    console.log("Line continues: ", lines[i + j]);
+                if (/^[a-z]|\(/.test(lines[i + j]) && !lines[i + j].startsWith('Image ')) {
+                    // console.log("Line continues: ", lines[i + j]);
 
                     if (isEndsWithSlash) {
                         //remove slash
@@ -146,8 +147,8 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages) {
                     break;
                 }
             }
-            console.log("result: ", lines[i + 1]);
-            console.log("___________________________");
+            // console.log("result: ", lines[i + 1]);
+            // console.log("___________________________");
 
 
         }
@@ -165,12 +166,32 @@ function removeNumbersAtTheEndOfLinesAfterDot(lines) {
     });
 }
 
+function AddNewLineBeforeImages(lines) {
+    for (let i = 0; i < lines.length; i++) {
+        if (/Image \d+\./.test(lines[i]) && !lines[i].startsWith('Image ')) {
+            lines[i] = lines[i].replace(/(Image \d+\.)/g, '\n$1');
+            const [line, newLine] = lines[i].split('\n');
+            console.log("line: ", line);
+            console.log("newLine: ", newLine);
+            console.log("----");
+
+            lines[i] = line;
+            //add the new line after the current line
+            lines.splice(i + 1, 0, newLine);
+            i--
+
+
+        }
+    }
+    return lines
+}
 
 
 const arrayOfFunctions = [
     removeEmptyLines,
     removeLinesWithNumbersOnly,
-    removeNumbersAtTheEndOfLinesAfterDot
+    removeNumbersAtTheEndOfLinesAfterDot,
+    AddNewLineBeforeImages
 ]
 
 function splitToChapters(lines) {
@@ -226,60 +247,6 @@ function parseBookByChapters(filePath) {
         return acc
     }, {})
 
-    // Initialize an empty object to store chapters
-    const chapters = {};
-
-    // Split the content by chapter headings including "INTRODUCTION", "C H A P T E R   X", and "CHAPTER X"
-    // const chapterSplits = content.split(/(INTRODUCTION|C\sH\sA\sP\sT\sE\sR\s{3}\d+|CHAPTER \d+)/);
-
-    // Iterate through the split content and store each chapter's content in the object
-    for (let i = 1; i < chapterSplits.length; i += 2) {
-        let chapterTitle = chapterSplits[i].trim();
-        let chapterContent = chapterSplits[i + 1].trim();
-
-        // Normalize the chapter title
-        chapterTitle = normalizeChapterTitle(chapterTitle);
-
-        // Remove the chapter title from the content along with any surrounding new lines
-        // const chapterTitleRegex = new RegExp(`^${chapterTitle}`, 'm');
-        // chapterContent = chapterContent.replace(chapterTitleRegex, '').trim();
-
-        // Split the chapter content into paragraphs
-        const paragraphs = chapterContent.split(/\n/).map(paragraph => paragraph.trim());
-
-        // Handle the special case for "INTRODUCTION"
-        if (chapterTitle === 'INTRODUCTION') {
-            if (chapters[chapterTitle]) {
-                chapters[chapterTitle].content.push(...paragraphs);
-            } else {
-                chapters[chapterTitle] = {
-                    name: 'INTRODUCTION',
-                    content: paragraphs
-                };
-            }
-        } else {
-            // Extract the first line as the chapter name
-            const lines = chapterContent.split('\n');
-            // const chapterName = lines.shift().trim();
-            // chapterContent = removeChapterNameFromContent(chapterContent, chapterName);
-            chapterContent = lines.join('\n').trim();
-
-            // Split the remaining content into paragraphs
-            const remainingParagraphs = chapterContent.split(/\n/).map(paragraph => paragraph.trim());
-
-            // Append content if chapter already exists, otherwise create new entry
-            if (chapters[chapterTitle]) {
-                chapters[chapterTitle].content.push(...remainingParagraphs);
-            } else {
-                chapters[chapterTitle] = {
-                    name: chapterTitle,
-                    content: remainingParagraphs
-                };
-            }
-        }
-    }
-
-    return chapters;
 }
 
 // Example usage
