@@ -37,14 +37,23 @@ function splitTextToSentences(text, minWords = 10) {
 export function Main() {
 
     const [audioChunks, setAudioChunks] = useState({});
-    const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
-    // console.log({ currentChunkIndex });
+    // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
     const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
+    const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({});
+    const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] || 0
+    const setCurrentChunkIndex = (index) => {
+        setCurrentChunkIndexByChapter(prev => ({
+            ...prev,
+            [currentChapterIndex]: index
+        }))
+    }
+    // console.log({ currentChunkIndex });
+
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
 
     useEffect(() => {
-        setCurrentChunkIndex(0)
+        // setCurrentChunkIndex(0)
         setAudioChunks({})
     }, [currentChapterIndex])
 
@@ -198,8 +207,8 @@ export function Main() {
                     wordSpeed={wordSpeed}
                     audio={audioChunks[currentChunkIndex]?.audio}
                     onEnded={() => onAudioFinished()}
-                    onPrev={() => setCurrentChunkIndex(prev => Math.max(0, prev - 1))}
-                    onNext={() => setCurrentChunkIndex(prev => Math.min(chunks.length - 1, prev + 1))}
+                    onPrev={() => setCurrentChunkIndex(currentChunkIndex - 1)}
+                    onNext={() => setCurrentChunkIndex(currentChunkIndex + 1)}
                 />
             </div>
         </div>

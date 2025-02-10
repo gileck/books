@@ -38,6 +38,9 @@ export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onP
 
 
     const togglePlay = () => {
+        if (!audio) {
+            return
+        }
         const status = !isPlaying
         setIsPlaying(status);
         if (status) {
