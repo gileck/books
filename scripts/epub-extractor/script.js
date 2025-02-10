@@ -30,7 +30,7 @@ function readEpubFiles(epubFiles) {
 
     });
     // console.log(text);
-    fs.writeFileSync(path.join(__dirname, './output.txt'), text, 'utf-8');
+    // fs.writeFileSync(path.join(__dirname, './output2.txt'), text, 'utf-8');
 }
 
 readEpubFiles(epubFiles);

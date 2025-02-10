@@ -8,8 +8,9 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, SkipNext } from '@mui/icons-material';
 
-export function AudioPlayer({ wordSpeed, audio, onEnded, onPrev, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed }) {
+export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     // console.log({ isPlaying, audio });
 
@@ -103,6 +104,23 @@ export function AudioPlayer({ wordSpeed, audio, onEnded, onPrev, onNext, onWordS
         onNext();
     };
 
+    const handlePrevChapter = () => {
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+            // setIsPlaying(false);
+        }
+        onPrevChapter();
+    };
+    const handleNextChapter = () => {
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+            // setIsPlaying(false);
+        }
+        onNextChapter();
+    };
+
     const handlePrev = () => {
         if (audio) {
             audio.pause();
@@ -148,7 +166,11 @@ export function AudioPlayer({ wordSpeed, audio, onEnded, onPrev, onNext, onWordS
             zIndex: 1000,
         }}>
             <Grid container alignItems="center" justifyContent="center">
+
                 <Grid item>
+                    <IconButton onClick={handlePrevChapter}>
+                        <KeyboardDoubleArrowLeft style={{ color: 'white' }} />
+                    </IconButton>
                     <IconButton onClick={handlePrev}>
                         <SkipPreviousIcon style={{ color: 'white' }} />
                     </IconButton>
@@ -162,6 +184,10 @@ export function AudioPlayer({ wordSpeed, audio, onEnded, onPrev, onNext, onWordS
                     <IconButton onClick={handleNext}>
                         <SkipNextIcon style={{ color: 'white' }} />
                     </IconButton>
+                    <IconButton onClick={handleNextChapter}>
+                        <KeyboardDoubleArrowRight style={{ color: 'white' }} />
+                    </IconButton>
+
                 </Grid>
                 <Grid item>
                     <Button

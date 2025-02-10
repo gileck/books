@@ -1,7 +1,7 @@
-import { Slider } from '@mui/material';
+import { Box, Slider } from '@mui/material';
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 
-export function MainTextContent({ wordSpeed, timepoints, audio, currentChunkIndex, textChunks, onChunkSelect, onChunksFinished }) {
+export function MainTextContent({ images, wordSpeed, timepoints, audio, currentChunkIndex, textChunks, onChunkSelect, onChunksFinished }) {
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -91,6 +91,31 @@ export function MainTextContent({ wordSpeed, timepoints, audio, currentChunkInde
         return 'transparent';
     }
 
+    const renderWords = (text, chunkIndex) =>
+        text.split(' ')
+            .filter(word => word.trim() !== '')
+            .map((word, wordIndex) => (
+
+                <span
+                    key={wordIndex}
+                    onDoubleClick={() => handleWordDoubleClick(chunkIndex)}
+                    style={{
+                        backgroundColor: calcBackgroundColor(chunkIndex, wordIndex),
+                        padding: '0 2px',
+                        borderRadius: '3px',
+                        transition: 'background-color 0.2s',
+                        // fontWeight: currentChunkIndex === chunkIndex && isPlaying && currentWordIndex === wordIndex ? 'bold' : 'normal',
+                        cursor: 'pointer'
+                    }}
+                >
+                    {word}{' '}
+                </span>
+
+
+            ))
+
+
+
     return (
         <div style={{
             padding: '20px',
@@ -101,28 +126,54 @@ export function MainTextContent({ wordSpeed, timepoints, audio, currentChunkInde
 
 
             {textChunks.map((text, chunkIndex) => (
+
                 <div key={chunkIndex} id={`chunk-${chunkIndex}`}>
-                    {text.split(' ')
-                        .filter(word => word.trim() !== '')
-                        .map((word, wordIndex) => (
-                            <span
-                                key={wordIndex}
-                                onDoubleClick={() => handleWordDoubleClick(chunkIndex)}
-                                style={{
-                                    backgroundColor: calcBackgroundColor(chunkIndex, wordIndex),
-                                    padding: '0 2px',
-                                    borderRadius: '3px',
-                                    transition: 'background-color 0.2s',
-                                    // fontWeight: currentChunkIndex === chunkIndex && isPlaying && currentWordIndex === wordIndex ? 'bold' : 'normal',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {word}{' '}
-                            </span>
-                        ))}
+
+                    {
+                        text.startsWith('Image ') ? <ImageBox text={text} images={images} render={() => renderWords(text, chunkIndex)} /> : renderWords(text, chunkIndex)
+                    }
                 </div>
+
+
             ))}
 
         </div>
     );
+}
+
+function getImageSrc(images, text) {
+    const imageFromText = text.match(/Image \d+\./)
+    const imageKey = imageFromText && imageFromText[0]
+    const imageIndex = imageKey && imageKey.split('.')[0]
+    if (imageIndex && images[imageIndex]) {
+        return `/images/${images[imageIndex]}`
+    } else {
+        console.log('Image not found:', { text, imageIndex, imageFromText, images });
+        return null
+    }
+
+    return null
+}
+function ImageBox({ render, images, text }) {
+    return <>
+        <img
+
+            src={getImageSrc(images, text)}
+            alt={text}
+            style={{
+                width: '100%',
+                height: 'auto',
+                marginBottom: '20px'
+            }}
+        />
+        <Box
+            sx={{
+                border: '1px solid gray',
+                p: 1
+            }}
+        >
+            {render()}
+        </Box>
+
+    </>
 }

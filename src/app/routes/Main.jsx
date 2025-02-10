@@ -4,21 +4,54 @@ import { AudioPlayer } from "../components/AudioPlayer";
 import { MainTextContent } from "../components/MainTextContent"
 import EpubReader from "../components/EpubReader"
 import { localStorageAPI } from "../localStorageAPI"
+import { Box } from "@mui/material";
+import { set } from "lodash";
 const { getConfig, saveConfig } = localStorageAPI();
-function splitTextToSentences(text, maxWords = 10) {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    return sentences.map(s => s.trim());
+function splitTextToSentences(text, minWords = 10) {
+    const sentences = text.match(/[^.!?]+[.!?]/g) || [text]; // Split based on sentence-ending punctuation
+    let result = [];
+    let buffer = "";
+    let wordCount = 0;
+
+    for (let sentence of sentences) {
+        const words = sentence.trim().split(/\s+/);
+        wordCount += words.length;
+        buffer += (buffer ? " " : "") + sentence.trim();
+
+        if (wordCount >= minWords) {
+            result.push(buffer);
+            buffer = "";
+            wordCount = 0;
+        }
+    }
+
+    if (buffer.length > 0) {
+        result.push(buffer);
+    }
+
+    return result;
 }
+
+
+
 export function Main() {
 
     const [audioChunks, setAudioChunks] = useState({});
     const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
+    // console.log({ currentChunkIndex });
     const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
 
     useEffect(() => {
-        saveConfig('currentChunkIndex', currentChunkIndex);
+        setCurrentChunkIndex(0)
+        setAudioChunks({})
+    }, [currentChapterIndex])
+
+    useEffect(() => {
+        if (currentChunkIndex > 0) {
+            saveConfig('currentChunkIndex', currentChunkIndex);
+        }
         saveConfig('currentChapterIndex', currentChapterIndex);
         saveConfig('wordSpeed', wordSpeed);
         saveConfig('playbackSpeed', playbackSpeed);
@@ -34,6 +67,12 @@ export function Main() {
         shouldUsecache: false
     })
 
+    const { data: images } = useFetch('/images.json', {
+        disableFetchInBackground: true,
+        shouldUsecache: false
+    })
+
+
 
 
 
@@ -47,6 +86,7 @@ export function Main() {
 
 
     const chunks = splitTextToSentences(text)
+    // console.log({ chunks });
 
 
 
@@ -58,7 +98,7 @@ export function Main() {
 
             const data = await fetchWithCache('/api/tts', {
                 disableFetchInBackground: true,
-                shouldUsecache: true,
+                shouldUsecache: false,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: chunks[index] })
@@ -111,7 +151,24 @@ export function Main() {
 
     return (
         <div>
+            <Box
+                sx={{
+                    background: 'white',
+                    padding: '1rem',
+                    borderBottom: '1px solid #eee',
+                    textAlign: 'center'
+                }}
+            >
+                <h2>
+                    Chapter {currentChapterIndex}
+                </h2>
+                <h1>
+
+                    {chapters[currentChapterIndex]?.chapterName}
+                </h1>
+            </Box>
             <MainTextContent
+                images={images}
                 currentChunkIndex={currentChunkIndex}
                 textChunks={chunks}
                 timepoints={audioChunks[currentChunkIndex]?.timepoints}
@@ -131,6 +188,10 @@ export function Main() {
                 borderTop: '1px solid #eee'
             }}>
                 <AudioPlayer
+                    currentChapterIndex={currentChapterIndex}
+                    currentChapterName={chapters[currentChapterIndex]?.chapterName}
+                    onPrevChapter={() => setCurrentChapterIndex(prev => Math.max(0, prev - 1))}
+                    onNextChapter={() => setCurrentChapterIndex(prev => Math.min(chapters.length - 1, prev + 1))}
                     playbackSpeed={playbackSpeed}
                     setPlaybackSpeed={setPlaybackSpeed}
                     onWordSpeedChanged={onWordSpeedChanged}
