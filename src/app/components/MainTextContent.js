@@ -3,10 +3,12 @@ import VerticalAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { ReaderContent } from './ReaderContent';
 import { useTheme } from '@mui/material/styles';
+import { useSettings } from '../contexts/SettingsContext';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 const WINDOW_SIZE = 10; // Number of sentences to show above and below
 
-export function MainTextContent({ images, wordSpeed, timepoints, audio, currentChunkIndex, textChunks, onChunkSelect, onChunksFinished }) {
+export function MainTextContent({ images, wordSpeed, timepoints, audio, currentChunkIndex, textChunks, onChunkSelect, onChunksFinished, isBookmarked, currentChapterIndex }) {
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -14,6 +16,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     const [isCurrentChunkVisible, setIsCurrentChunkVisible] = useState(true);
 
     const theme = useTheme();
+    const { settings } = useSettings();
 
     const [visibleRange, setVisibleRange] = useState({
         start: Math.max(0, currentChunkIndex - WINDOW_SIZE),
@@ -174,39 +177,54 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     function calcBackgroundColor(chunkIndex, wordIndex) {
         if (currentChunkIndex === chunkIndex) {
             if (isPlaying && currentWordIndex === wordIndex) {
-                return theme.palette.primary.light;
-            } else {
-                return theme.palette.action.selected;
+                return settings.mode === 'dark'
+                    ? settings.highlightColors.wordDark
+                    : settings.highlightColors.word;
             }
+            return settings.mode === 'dark'
+                ? settings.highlightColors.sentenceDark
+                : settings.highlightColors.sentence;
         }
         return 'transparent';
     }
     const didImagesLoaded = images && Object.keys(images).length > 0;
 
-    const renderWords = (text, chunkIndex) =>
-        text.split(' ')
-            .filter(word => word.trim() !== '')
-            .map((word, wordIndex) => (
-
-                <span
-                    key={wordIndex}
-                    onDoubleClick={() => handleWordDoubleClick(chunkIndex)}
-                    style={{
-                        backgroundColor: calcBackgroundColor(chunkIndex, wordIndex),
-                        padding: '0 2px',
-                        borderRadius: '3px',
-                        transition: 'background-color 0.2s',
-                        // fontWeight: currentChunkIndex === chunkIndex && isPlaying && currentWordIndex === wordIndex ? 'bold' : 'normal',
-                        cursor: 'pointer'
+    const renderWords = (text, chunkIndex) => (
+        <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+            {isBookmarked(currentChapterIndex, chunkIndex) && (
+                <BookmarkIcon
+                    sx={{
+                        position: 'absolute',
+                        left: -24,
+                        top: 0,
+                        color: 'primary.main',
+                        fontSize: '1.2rem'
                     }}
-                >
-                    {word}{' '}
-                </span>
+                />
+            )}
+            {text.split(' ')
+                .filter(word => word.trim() !== '')
+                .map((word, wordIndex) => (
+
+                    <span
+                        key={wordIndex}
+                        onDoubleClick={() => handleWordDoubleClick(chunkIndex)}
+                        style={{
+                            backgroundColor: calcBackgroundColor(chunkIndex, wordIndex),
+                            padding: '0 2px',
+                            borderRadius: '3px',
+                            transition: 'background-color 0.2s',
+                            // fontWeight: currentChunkIndex === chunkIndex && isPlaying && currentWordIndex === wordIndex ? 'bold' : 'normal',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {word}{' '}
+                    </span>
 
 
-            ))
-
-
+                ))}
+        </div>
+    );
 
     return (
         <Box

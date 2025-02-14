@@ -11,6 +11,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useAppearanceSettings } from '../hooks/useAppearanceSettings';
 import { useAppThemes } from '../hooks/useAppThemes';
 import { SettingsContext } from '../contexts/SettingsContext';
+import { useBookmarks } from '../hooks/useBookmarks';
 
 const { getConfig, saveConfig } = localStorageAPI();
 function splitTextToSentences(text, minWords = 10) {
@@ -43,9 +44,7 @@ function splitTextToSentences(text, minWords = 10) {
 export function Main() {
     const { settings, handleSettingsChange } = useAppearanceSettings();
     const { appTheme, contentTheme } = useAppThemes(settings);
-
-    console.log({ settings, appTheme });
-
+    const { bookmarks, addBookmark, removeBookmark, isBookmarked, toggleBookmark } = useBookmarks();
 
     // Remove the theme creation code from here since it's now in useAppThemes
 
@@ -190,6 +189,26 @@ export function Main() {
         progress: chunks.length > 0 ? (currentChunkIndex / chunks.length) * 100 : 0
     };
 
+    const handleAddBookmark = (name) => {
+        const isCurrentlyBookmarked = isBookmarked(currentChapterIndex, currentChunkIndex);
+        if (isCurrentlyBookmarked) {
+            const bookmark = bookmarks.find(
+                b => b.chapterIndex === currentChapterIndex && b.chunkIndex === currentChunkIndex
+            );
+            if (bookmark) {
+                removeBookmark(bookmark.id);
+            }
+        } else {
+            addBookmark(
+                currentChapterIndex,
+                currentChunkIndex,
+                chapters[currentChapterIndex]?.chapterName,
+                chunks[currentChunkIndex],
+                name
+            );
+        }
+    };
+
     return (
         <ThemeProvider theme={appTheme}>
             <CssBaseline />
@@ -210,6 +229,8 @@ export function Main() {
                                 onChunkSelect={handleChunkSelect}
                                 onChunksFinished={onChunksFinished}
                                 wordSpeed={wordSpeed}
+                                isBookmarked={isBookmarked}
+                                currentChapterIndex={currentChapterIndex}
                             />
                         </ThemeProvider>
                     </div>
@@ -230,6 +251,7 @@ export function Main() {
                         boxShadow: '0 -2px 8px rgba(0,0,0,0.1)'
                     }}>
                         <AudioPlayer
+                            isBookmarked={() => isBookmarked(currentChapterIndex, currentChunkIndex)}
                             displayedText={`Chapter ${currentChapterIndex}: ${chapters[currentChapterIndex]?.chapterName}`}
                             currentChapterIndex={currentChapterIndex}
                             currentChapterName={chapters[currentChapterIndex]?.chapterName}
@@ -250,6 +272,13 @@ export function Main() {
                                 setAudioChunks({});
                             }}
                             progressMetrics={progressMetrics}
+                            bookmarks={bookmarks}
+                            onAddBookmark={handleAddBookmark}
+                            onBookmarkSelect={(bookmark) => {
+                                setCurrentChapterIndex(bookmark.chapterIndex);
+                                setCurrentChunkIndex(bookmark.chunkIndex);
+                            }}
+                            onRemoveBookmark={removeBookmark}
                         />
                     </div>
                 </div>

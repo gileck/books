@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton, Slider, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { IconButton, Slider, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -12,8 +12,13 @@ import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, SkipNext } from '@mu
 import LinearProgress from '@mui/material/LinearProgress';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { AppearanceSettingsDialog } from './AppearanceSettingsDialog';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarksIcon from '@mui/icons-material/Bookmarks';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { BookmarksDialog } from './BookmarksDialog';
+import { BookmarkNameDialog } from './BookmarkNameDialog';
 
-export function AudioPlayer({ displayedText, progressMetrics, currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
+export function AudioPlayer({ displayedText, progressMetrics, currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange, bookmarks, onAddBookmark, onBookmarkSelect, onRemoveBookmark, isBookmarked }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     // console.log({ isPlaying, audio });
 
@@ -21,6 +26,8 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
     const [speedDialogOpen, setSpeedDialogOpen] = React.useState(false);
     const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
     const [appearanceDialogOpen, setAppearanceDialogOpen] = useState(false);
+    const [bookmarksDialogOpen, setBookmarksDialogOpen] = useState(false);
+    const [bookmarkNameDialogOpen, setBookmarkNameDialogOpen] = useState(false);
 
     const voices = [
         { id: 'en-US-Neural2-A', name: 'Female 1' },
@@ -102,11 +109,6 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
         onWordSpeedChanged(newSpeed);
     };
 
-
-
-
-
-
     const toggleOptionsDialog = () => {
         setOptionsDialogOpen(!optionsDialogOpen);
     };
@@ -146,8 +148,6 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
         onPrev();
     };
 
-
-
     useEffect(() => {
         if (audio) {
             audio.addEventListener('play', () => {
@@ -166,6 +166,23 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
         }
         return () => audio?.removeEventListener('ended', onEnded);
     }, [audio]);
+
+    const isCurrentSentenceBookmarked = () => {
+        try {
+            return isBookmarked();
+        } catch (error) {
+            console.warn('Error checking bookmark status:', error);
+            return false;
+        }
+    };
+
+    const handleBookmarkClick = () => {
+        if (isCurrentSentenceBookmarked()) {
+            onAddBookmark(); // This will now remove the bookmark
+        } else {
+            setBookmarkNameDialogOpen(true);
+        }
+    };
 
     return (
         <div>
@@ -206,7 +223,6 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
                 }}
             />
             <Grid container alignItems="center" justifyContent="center">
-
                 <Grid item>
                     <IconButton onClick={handlePrevChapter}>
                         <KeyboardDoubleArrowLeft style={{ color: 'white' }} />
@@ -227,7 +243,6 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
                     <IconButton onClick={handleNextChapter}>
                         <KeyboardDoubleArrowRight style={{ color: 'white' }} />
                     </IconButton>
-
                 </Grid>
                 <Grid item>
                     <Button
@@ -244,6 +259,30 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
                 <Grid item>
                     <IconButton onClick={() => setAppearanceDialogOpen(true)} style={{ color: 'white' }}>
                         <SettingsIcon />
+                    </IconButton>
+                </Grid>
+                <Grid item>
+                    <IconButton
+                        onClick={handleBookmarkClick}
+                        sx={{
+                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
+                            backgroundColor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                            '&:hover': {
+                                backgroundColor: isCurrentSentenceBookmarked()
+                                    ? 'rgba(29, 185, 84, 0.2)'
+                                    : 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }}
+                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}
+                    >
+                        <BookmarkIcon />
+                    </IconButton>
+                    <IconButton
+                        onClick={() => setBookmarksDialogOpen(true)}
+                        style={{ color: 'white' }}
+                        title="View bookmarks"
+                    >
+                        <BookmarksIcon />
                     </IconButton>
                 </Grid>
             </Grid>
@@ -331,7 +370,7 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
                                 step={0.1}
                                 marks={[
                                     { value: 0, label: '1x' },
-                                    { value: 0.5, label: '1.5x' },
+                                    { value: .5, label: '1.5x' },
                                     { value: 1, label: '2x' },
                                 ]}
                                 valueLabelDisplay="auto"
@@ -368,6 +407,19 @@ export function AudioPlayer({ displayedText, progressMetrics, currentChapterName
                     </Button>
                 </DialogActions>
             </Dialog>
+            <BookmarksDialog
+                open={bookmarksDialogOpen}
+                onClose={() => setBookmarksDialogOpen(false)}
+                bookmarks={bookmarks}
+                onBookmarkSelect={onBookmarkSelect}
+                onRemoveBookmark={onRemoveBookmark}
+            />
+            <BookmarkNameDialog
+                open={bookmarkNameDialogOpen}
+                onClose={() => setBookmarkNameDialogOpen(false)}
+                onSave={(name) => onAddBookmark(name)}
+                defaultName={currentChapterName}
+            />
             <AppearanceSettingsDialog
                 open={appearanceDialogOpen}
                 onClose={() => setAppearanceDialogOpen(false)}

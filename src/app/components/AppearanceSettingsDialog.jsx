@@ -17,6 +17,7 @@ import {
     FormControlLabel,
     Slider,
     Box,
+    Grid
 } from '@mui/material';
 
 const themes = {
@@ -51,6 +52,21 @@ const fontFamilies = [
 export function AppearanceSettingsDialog({ open, onClose }) {
     const { settings, handleSettingsChange } = useSettings();
     const [localSettings, setLocalSettings] = React.useState(settings);
+
+    // Ensure highlightColors exist
+    React.useEffect(() => {
+        if (!localSettings.highlightColors) {
+            setLocalSettings(prev => ({
+                ...prev,
+                highlightColors: {
+                    sentence: '#e3f2fd',
+                    word: '#89c4f5',
+                    sentenceDark: '#294964',
+                    wordDark: '#1976d2',
+                }
+            }));
+        }
+    }, [localSettings]);
 
     React.useEffect(() => {
         setLocalSettings(settings);
@@ -166,6 +182,58 @@ export function AppearanceSettingsDialog({ open, onClose }) {
                             />
                         ))}
                     </RadioGroup>
+                </Box>
+
+                <Box sx={{ mb: 4 }}>
+                    <Typography variant="h6" gutterBottom>Highlight Colors</Typography>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <Typography gutterBottom>Sentence Highlight</Typography>
+                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                <Typography>Light:</Typography>
+                                <input
+                                    type="color"
+                                    value={localSettings.highlightColors.sentence}
+                                    onChange={(e) => handleChange('highlightColors', {
+                                        ...localSettings.highlightColors,
+                                        sentence: e.target.value
+                                    })}
+                                />
+                                <Typography>Dark:</Typography>
+                                <input
+                                    type="color"
+                                    value={localSettings.highlightColors.sentenceDark}
+                                    onChange={(e) => handleChange('highlightColors', {
+                                        ...localSettings.highlightColors,
+                                        sentenceDark: e.target.value
+                                    })}
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography gutterBottom>Current Word Highlight</Typography>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                <Typography>Light:</Typography>
+                                <input
+                                    type="color"
+                                    value={localSettings.highlightColors.word}
+                                    onChange={(e) => handleChange('highlightColors', {
+                                        ...localSettings.highlightColors,
+                                        word: e.target.value
+                                    })}
+                                />
+                                <Typography>Dark:</Typography>
+                                <input
+                                    type="color"
+                                    value={localSettings.highlightColors.wordDark}
+                                    onChange={(e) => handleChange('highlightColors', {
+                                        ...localSettings.highlightColors,
+                                        wordDark: e.target.value
+                                    })}
+                                />
+                            </Box>
+                        </Grid>
+                    </Grid>
                 </Box>
 
                 <Box sx={{ mb: 2 }}>
