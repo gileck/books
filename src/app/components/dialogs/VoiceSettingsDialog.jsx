@@ -11,30 +11,5 @@ const voices = [
 ];
 
 export function VoiceSettingsDialog({ open, onClose, selectedVoice, onVoiceChange }) {
-    return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Voice Settings</DialogTitle>
-            <DialogContent>
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Voice</InputLabel>
-                    <Select
-                        value={selectedVoice}
-                        onChange={(e) => onVoiceChange(e.target.value)}
-                        label="Voice"
-                    >
-                        {voices.map((voice) => (
-                            <MenuItem key={voice.id} value={voice.id}>
-                                {voice.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Close
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
+    return null;
 }

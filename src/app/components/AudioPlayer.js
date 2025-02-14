@@ -9,10 +9,7 @@ import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-ma
 import LinearProgress from '@mui/material/LinearProgress';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarksIcon from '@mui/icons-material/Bookmarks';
 import { SpeedSettingsDialog } from './dialogs/SpeedSettingsDialog';
-import { VoiceSettingsDialog } from './dialogs/VoiceSettingsDialog';
-import { BookmarksDialog } from './dialogs/BookmarksDialog';
 import { BookmarkNameDialog } from './dialogs/BookmarkNameDialog';
 import { AppearanceSettingsDialog } from './dialogs/AppearanceSettingsDialog';
 
@@ -42,7 +39,6 @@ export function AudioPlayer({
     const [speedDialogOpen, setSpeedDialogOpen] = useState(false);
     const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
     const [appearanceDialogOpen, setAppearanceDialogOpen] = useState(false);
-    const [bookmarksDialogOpen, setBookmarksDialogOpen] = useState(false);
     const [bookmarkNameDialogOpen, setBookmarkNameDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -156,20 +152,7 @@ export function AudioPlayer({
                     </IconButton>
                 </Grid>
 
-                <Grid item>
-                    <IconButton 
-                        onClick={handleBookmarkClick} 
-                        sx={{
-                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
-                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
-                            '&:hover': {
-                                bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.2)': 'rgba(255, 255, 255, 0.1)'
-                                }
-                        }}
-                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}>
-                            <BookmarkIcon />
-                    </IconButton>
-                </Grid>
+                
                 <Grid item>
                     
                     <IconButton onClick={() => handleAudioAction(onPrev)} sx={{ color: 'white' }}>
@@ -195,36 +178,50 @@ export function AudioPlayer({
                     <IconButton onClick={() => handleAudioAction(onNext)} sx={{ color: 'white' }}>
                         <SkipNextIcon />
                     </IconButton>
-                    
                 </Grid>
 
                 <Grid item>
-                    <Button
+                    <IconButton
                         onClick={() => setSpeedDialogOpen(true)}
                         sx={{ color: 'white', fontSize: '12px' }}
                     >
                         {playbackSpeed.toFixed(1)}x
-                    </Button>
-                </Grid>
-
-                <Grid item>
-                    <IconButton onClick={() => setOptionsDialogOpen(true)} sx={{ color: 'white' }}>
-                        <MoreVertIcon />
                     </IconButton>
                 </Grid>
 
-                
+                {/* <Grid item>
+                    <IconButton onClick={() => setOptionsDialogOpen(true)} sx={{ color: 'white' }}>
+                        <MoreVertIcon />
+                    </IconButton>
+                </Grid> */}
 
                 <Grid item>
+                                    <IconButton 
+                                        onClick={handleBookmarkClick} 
+                                        sx={{
+                                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
+                                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                                            '&:hover': {
+                                                bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.2)': 'rgba(255, 255, 255, 0.1)'
+                                                }
+                                        }}
+                                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}>
+                                            <BookmarkIcon />
+                                    </IconButton>
+                                </Grid>
+
+                
+
+                {/* <Grid item>
                     
-                    {/* <IconButton
+                    <IconButton
                         onClick={() => setBookmarksDialogOpen(true)}
                         sx={{ color: 'white' }}
                         title="View bookmarks"
                     >
                         <BookmarksIcon />
-                    </IconButton> */}
-                </Grid>
+                    </IconButton>
+                </Grid> */}
             </Grid>
 
             {/* Dialogs */}
@@ -239,30 +236,8 @@ export function AudioPlayer({
                 onSpeedDecrease={() => setPlaybackSpeed(Math.max(playbackSpeed - 0.1, 0.5))}
                 onWordSpeedIncrease={() => onWordSpeedChanged(Math.min(wordSpeed + 0.1, 2))}
                 onWordSpeedDecrease={() => onWordSpeedChanged(Math.max(wordSpeed - 0.1, 0))}
-            />
-
-            <VoiceSettingsDialog
-                open={optionsDialogOpen}
-                onClose={() => setOptionsDialogOpen(false)}
                 selectedVoice={selectedVoice}
                 onVoiceChange={onVoiceChange}
-            />
-
-            <BookmarksDialog
-
-                open={bookmarksDialogOpen}
-                onClose={() => setBookmarksDialogOpen(false)}
-                bookmarks={bookmarks}
-                onBookmarkSelect={onBookmarkSelect}
-                onRemoveBookmark={onRemoveBookmark}
-            />
-
-            <BookmarksDialog
-                open={bookmarksDialogOpen}
-                onClose={() => setBookmarksDialogOpen(false)}
-                bookmarks={bookmarks}
-                onBookmarkSelect={onBookmarkSelect}
-                onRemoveBookmark={onRemoveBookmark}
             />
 
             <BookmarkNameDialog

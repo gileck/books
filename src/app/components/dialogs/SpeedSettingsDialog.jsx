@@ -1,7 +1,16 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography, IconButton, Slider } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography, IconButton, Slider, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+
+const voices = [
+    { id: 'en-US-Neural2-A', name: 'Female 1' },
+    { id: 'en-US-Neural2-C', name: 'Female 2' },
+    { id: 'en-US-Neural2-D', name: 'Male 1' },
+    { id: 'en-US-Neural2-F', name: 'Male 2' },
+    { id: 'en-US-Neural2-H', name: 'Female 3' },
+    { id: 'en-US-Neural2-I', name: 'Male 3' },
+];
 
 export function SpeedSettingsDialog({
     open,
@@ -14,6 +23,8 @@ export function SpeedSettingsDialog({
     onSpeedDecrease,
     onWordSpeedIncrease,
     onWordSpeedDecrease,
+    selectedVoice,
+    onVoiceChange
 }) {
     return (
         <Dialog
@@ -29,7 +40,7 @@ export function SpeedSettingsDialog({
                 }
             }}
         >
-            <DialogTitle>Playback Speed</DialogTitle>
+            <DialogTitle>Playback Speed & Voice Settings</DialogTitle>
             <DialogContent sx={{
                 minHeight: { xs: 150, sm: 200 },
                 px: { xs: 2, sm: 4 },
@@ -109,6 +120,27 @@ export function SpeedSettingsDialog({
                             ]}
                             valueLabelDisplay="auto"
                         />
+                    </Grid>
+
+                    {/* Voice Settings Controls */}
+                    <Grid item xs={12}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Voice Settings
+                        </Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Voice</InputLabel>
+                            <Select
+                                value={selectedVoice}
+                                onChange={(e) => onVoiceChange(e.target.value)}
+                                label="Voice"
+                            >
+                                {voices.map((voice) => (
+                                    <MenuItem key={voice.id} value={voice.id}>
+                                        {voice.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Grid>
                 </Grid>
             </DialogContent>
