@@ -241,7 +241,7 @@ export function Main() {
                         backgroundColor: '#282828',  // Back to dark background
                         color: 'white',  // Always white text
                         position: 'fixed',
-                        bottom: 10,
+                        bottom: 0,
                         left: 0,
                         right: 0,
                         zIndex: 1000,
