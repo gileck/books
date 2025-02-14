@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton, Grid, Typography, Button } from '@mui/material';
+import { IconButton, Grid, Typography, Button, Box } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
@@ -52,7 +52,6 @@ export function AudioPlayer({
         }
     }, [audio, isPlaying]);
 
-
     useEffect(() => {
         if (!audio) return;
         audio.playbackRate = playbackSpeed;
@@ -104,21 +103,25 @@ export function AudioPlayer({
     };
 
     return (
-        <div>
+        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto', p: 2 }}>
             {/* Progress Display */}
             <Typography
                 variant="subtitle1"
                 sx={{
                     color: 'white',
                     textAlign: 'center',
-                    mb: 0.5,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    maxWidth: '300px'
                 }}
             >
+                <IconButton onClick={() => handleAudioAction(onPrevChapter)} sx={{ color: 'white' }}>
+                                        <KeyboardDoubleArrowLeft />
+                                    </IconButton>
                 {displayedText}
+                <IconButton onClick={() => handleAudioAction(onNextChapter)} sx={{ color: 'white' }}>
+                                        <KeyboardDoubleArrowRight />
+                                    </IconButton>
             </Typography>
 
             <Typography
@@ -148,9 +151,27 @@ export function AudioPlayer({
             {/* Controls */}
             <Grid container alignItems="center" justifyContent="center" spacing={1}>
                 <Grid item>
-                    <IconButton onClick={() => handleAudioAction(onPrevChapter)} sx={{ color: 'white' }}>
-                        <KeyboardDoubleArrowLeft />
+                    <IconButton onClick={() => setAppearanceDialogOpen(true)} sx={{ color: 'white' }}>
+                        <SettingsIcon />
                     </IconButton>
+                </Grid>
+
+                <Grid item>
+                    <IconButton 
+                        onClick={handleBookmarkClick} 
+                        sx={{
+                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
+                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                            '&:hover': {
+                                bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.2)': 'rgba(255, 255, 255, 0.1)'
+                                }
+                        }}
+                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}>
+                            <BookmarkIcon />
+                    </IconButton>
+                </Grid>
+                <Grid item>
+                    
                     <IconButton onClick={() => handleAudioAction(onPrev)} sx={{ color: 'white' }}>
                         <SkipPreviousIcon />
                     </IconButton>
@@ -174,9 +195,7 @@ export function AudioPlayer({
                     <IconButton onClick={() => handleAudioAction(onNext)} sx={{ color: 'white' }}>
                         <SkipNextIcon />
                     </IconButton>
-                    <IconButton onClick={() => handleAudioAction(onNextChapter)} sx={{ color: 'white' }}>
-                        <KeyboardDoubleArrowRight />
-                    </IconButton>
+                    
                 </Grid>
 
                 <Grid item>
@@ -194,35 +213,17 @@ export function AudioPlayer({
                     </IconButton>
                 </Grid>
 
-                <Grid item>
-                    <IconButton onClick={() => setAppearanceDialogOpen(true)} sx={{ color: 'white' }}>
-                        <SettingsIcon />
-                    </IconButton>
-                </Grid>
+                
 
                 <Grid item>
-                    <IconButton
-                        onClick={handleBookmarkClick}
-                        sx={{
-                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
-                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
-                            '&:hover': {
-                                bgcolor: isCurrentSentenceBookmarked()
-                                    ? 'rgba(29, 185, 84, 0.2)'
-                                    : 'rgba(255, 255, 255, 0.1)'
-                            }
-                        }}
-                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}
-                    >
-                        <BookmarkIcon />
-                    </IconButton>
-                    <IconButton
+                    
+                    {/* <IconButton
                         onClick={() => setBookmarksDialogOpen(true)}
                         sx={{ color: 'white' }}
                         title="View bookmarks"
                     >
                         <BookmarksIcon />
-                    </IconButton>
+                    </IconButton> */}
                 </Grid>
             </Grid>
 
@@ -248,6 +249,15 @@ export function AudioPlayer({
             />
 
             <BookmarksDialog
+
+                open={bookmarksDialogOpen}
+                onClose={() => setBookmarksDialogOpen(false)}
+                bookmarks={bookmarks}
+                onBookmarkSelect={onBookmarkSelect}
+                onRemoveBookmark={onRemoveBookmark}
+            />
+
+            <BookmarksDialog
                 open={bookmarksDialogOpen}
                 onClose={() => setBookmarksDialogOpen(false)}
                 bookmarks={bookmarks}
@@ -266,6 +276,6 @@ export function AudioPlayer({
                 open={appearanceDialogOpen}
                 onClose={() => setAppearanceDialogOpen(false)}
             />
-        </div>
+        </Box>
     );
 }
