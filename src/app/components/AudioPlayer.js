@@ -237,7 +237,10 @@ export function AudioPlayer({
                 onWordSpeedIncrease={() => onWordSpeedChanged(Math.min(wordSpeed + 0.1, 2))}
                 onWordSpeedDecrease={() => onWordSpeedChanged(Math.max(wordSpeed - 0.1, 0))}
                 selectedVoice={selectedVoice}
-                onVoiceChange={onVoiceChange}
+                onVoiceChange={(voice) => {
+                    onVoiceChange(voice);
+                    audio.pause();
+                }}
             />
 
             <BookmarkNameDialog

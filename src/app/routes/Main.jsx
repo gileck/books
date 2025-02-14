@@ -67,6 +67,8 @@ export function Main() {
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
     const [selectedVoice, setSelectedVoice] = useState(getConfig('selectedVoice') || 'en-US-Neural2-A');
+    console.log({selectedVoice});
+    
 
     useEffect(() => {
         setCurrentChunkIndex(currentChunkIndexByChapter[currentChapterIndex] || 0)
