@@ -1,5 +1,8 @@
-import { Box, Slider, CircularProgress } from '@mui/material';
+import { Box, Slider, CircularProgress, Fab } from '@mui/material';
+import VerticalAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { ReaderContent } from './ReaderContent';
+import { useTheme } from '@mui/material/styles';
 
 const WINDOW_SIZE = 10; // Number of sentences to show above and below
 
@@ -8,21 +11,22 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [isInitialScrollComplete, setIsInitialScrollComplete] = useState(false);
+    const [isCurrentChunkVisible, setIsCurrentChunkVisible] = useState(true);
+
+    const theme = useTheme();
 
     const [visibleRange, setVisibleRange] = useState({
         start: Math.max(0, currentChunkIndex - WINDOW_SIZE),
         end: currentChunkIndex + WINDOW_SIZE
     });
 
-    const topLoaderRef = useRef(null);
-    const bottomLoaderRef = useRef(null);
     const containerRef = useRef(null);
     const topTriggerRef = useRef(null);
     const bottomTriggerRef = useRef(null);
 
     useLayoutEffect(() => {
-        if (isInitialScrollComplete) return;
         const element = document.getElementById(`chunk-${currentChunkIndex}`);
+
 
         if (element) {
             setIsInitialScrollComplete(false); // Reset before new scroll
@@ -36,7 +40,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
             return () => clearTimeout(timer);
         }
 
-    }, [currentChunkIndex, textChunks.length, visibleRange.start, visibleRange.end]);
+    }, [currentChunkIndex, textChunks.length]);
 
     useEffect(() => {
         if (!audio) return;
@@ -96,37 +100,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
         return () => audio.removeEventListener('timeupdate', handleTimeUpdate);
     }, [audio, timepoints]);
 
-    useEffect(() => {
-        if (!isInitialScrollComplete) return; // Don't setup observer until initial scroll is done
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (entry.target === topLoaderRef.current) {
-                            // Load more content at the top
-                            setVisibleRange(prev => ({
-                                start: Math.max(0, prev.start - WINDOW_SIZE),
-                                end: prev.end
-                            }));
-                        } else if (entry.target === bottomLoaderRef.current) {
-                            // Load more content at the bottom
-                            setVisibleRange(prev => ({
-                                start: prev.start,
-                                end: Math.min(textChunks.length, prev.end + WINDOW_SIZE)
-                            }));
-                        }
-                    }
-                });
-            },
-            { threshold: 0.1 }
-        );
-
-        if (topLoaderRef.current) observer.observe(topLoaderRef.current);
-        if (bottomLoaderRef.current) observer.observe(bottomLoaderRef.current);
-
-        return () => observer.disconnect();
-    }, [isInitialScrollComplete, textChunks.length]);
 
     // Add scroll monitoring effect
     useEffect(() => {
@@ -134,12 +108,14 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
         const options = {
             root: containerRef.current,
-            threshold: 0.1,
+            threshold: 0.1, // More tolerant threshold
+            rootMargin: '200px 0px', // Creates a 200px buffer zone top and bottom
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
+                // Only trigger when element is at least 10% visible
+                if (!entry.isIntersecting || entry.intersectionRatio < 0.1) return;
 
                 if (entry.target === topTriggerRef.current && visibleRange.start > 0) {
                     setVisibleRange(prev => ({
@@ -161,6 +137,34 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
         return () => observer.disconnect();
     }, [isInitialScrollComplete, visibleRange.start, visibleRange.end, textChunks.length]);
 
+    // Add observer for current chunk visibility
+    useEffect(() => {
+        const currentElement = document.getElementById(`chunk-${currentChunkIndex}`);
+        if (!currentElement || !containerRef.current) return;
+
+        const options = {
+            root: containerRef.current,
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                setIsCurrentChunkVisible(entry.isIntersecting);
+            });
+        }, options);
+
+        observer.observe(currentElement);
+        return () => observer.disconnect();
+    }, [currentChunkIndex, containerRef.current, textChunks.length]);
+
+    const scrollToCurrentChunk = () => {
+        const element = document.getElementById(`chunk-${currentChunkIndex}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
     const handleWordDoubleClick = (chunkIndex) => {
         if (onChunkSelect) {
             onChunkSelect(chunkIndex);
@@ -168,15 +172,13 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     };
 
     function calcBackgroundColor(chunkIndex, wordIndex) {
-        // currentChunkIndex === chunkIndex ? '#e3f2fd' : 'transparent'
         if (currentChunkIndex === chunkIndex) {
             if (isPlaying && currentWordIndex === wordIndex) {
-                return '#89c4f5';
+                return theme.palette.primary.light;
             } else {
-                return '#e3f2fd';
+                return theme.palette.action.selected;
             }
         }
-
         return 'transparent';
     }
     const didImagesLoaded = images && Object.keys(images).length > 0;
@@ -207,28 +209,53 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
 
     return (
-        <div
+        <Box
             ref={containerRef}
-
+            sx={{
+                height: '100%',
+                overflowY: 'auto',
+                position: 'relative',
+                backgroundColor: 'background.default',
+            }}
         >
             <div ref={topTriggerRef} style={{ height: '10px' }} />
 
-            {textChunks
-                .slice(visibleRange.start, visibleRange.end)
-                .map((text, localIndex) => {
-                    const globalIndex = localIndex + visibleRange.start;
-                    return (
-                        <div key={globalIndex} id={`chunk-${globalIndex}`}>
-                            {text.startsWith('Image ') && didImagesLoaded
-                                ? <ImageBox text={text} images={images} render={() => renderWords(text, globalIndex)} />
-                                : renderWords(text, globalIndex)
-                            }
-                        </div>
-                    );
-                })}
+            <ReaderContent>
+                {textChunks
+                    .slice(visibleRange.start, visibleRange.end)
+                    .map((text, localIndex) => {
+                        const globalIndex = localIndex + visibleRange.start;
+                        return (
+                            <div key={globalIndex} id={`chunk-${globalIndex}`}>
+                                {text.startsWith('Image ') && didImagesLoaded
+                                    ? <ImageBox text={text} images={images} render={() => renderWords(text, globalIndex)} />
+                                    : renderWords(text, globalIndex)
+                                }
+                            </div>
+                        );
+                    })}
+            </ReaderContent>
 
-            <div ref={bottomTriggerRef} style={{ height: '10px' }} />
-        </div>
+            <div ref={bottomTriggerRef} style={{
+                height: '10px',
+            }} />
+
+            {!isCurrentChunkVisible && (
+                <Fab
+                    color="primary"
+                    size="small"
+                    onClick={scrollToCurrentChunk}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 80,
+                        right: 16,
+                        zIndex: 100000
+                    }}
+                >
+                    <VerticalAlignCenterIcon />
+                </Fab>
+            )}
+        </Box>
     );
 }
 

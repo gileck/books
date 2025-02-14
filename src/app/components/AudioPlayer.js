@@ -9,14 +9,18 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, SkipNext } from '@mui/icons-material';
+import LinearProgress from '@mui/material/LinearProgress';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { AppearanceSettingsDialog } from './AppearanceSettingsDialog';
 
-export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
+export function AudioPlayer({ displayedText, progressMetrics, currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     // console.log({ isPlaying, audio });
 
     const [volume, setVolume] = React.useState(30);
     const [speedDialogOpen, setSpeedDialogOpen] = React.useState(false);
     const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
+    const [appearanceDialogOpen, setAppearanceDialogOpen] = useState(false);
 
     const voices = [
         { id: 'en-US-Neural2-A', name: 'Female 1' },
@@ -168,9 +172,9 @@ export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audi
             <Typography
                 variant="subtitle1"
                 style={{
-                    color: 'white',
+                    color: 'white',  // Always white
                     textAlign: 'center',
-                    marginBottom: '10px',
+                    marginBottom: '5px',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -179,6 +183,28 @@ export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audi
             >
                 {displayedText}
             </Typography>
+            <Typography
+                variant="caption"
+                style={{
+                    color: '#999',  // Always gray
+                    textAlign: 'center',
+                    display: 'block',
+                    marginBottom: '5px'
+                }}
+            >
+                {progressMetrics.current} / {progressMetrics.total} ({Math.round(progressMetrics.progress)}% complete)
+            </Typography>
+            <LinearProgress
+                variant="determinate"
+                value={progressMetrics.progress}
+                style={{
+                    marginBottom: '10px',
+                    backgroundColor: '#404040',
+                    '& .MuiLinearProgress-bar': {
+                        backgroundColor: '#1DB954'
+                    }
+                }}
+            />
             <Grid container alignItems="center" justifyContent="center">
 
                 <Grid item>
@@ -213,6 +239,11 @@ export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audi
                 <Grid item>
                     <IconButton onClick={toggleOptionsDialog} style={{ color: 'white' }}>
                         <MoreVertIcon />
+                    </IconButton>
+                </Grid>
+                <Grid item>
+                    <IconButton onClick={() => setAppearanceDialogOpen(true)} style={{ color: 'white' }}>
+                        <SettingsIcon />
                     </IconButton>
                 </Grid>
             </Grid>
@@ -337,6 +368,10 @@ export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audi
                     </Button>
                 </DialogActions>
             </Dialog>
+            <AppearanceSettingsDialog
+                open={appearanceDialogOpen}
+                onClose={() => setAppearanceDialogOpen(false)}
+            />
         </div>
     );
 }

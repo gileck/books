@@ -1,11 +1,17 @@
 import { fetchWithCache, useFetch } from "@/useFetch"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { AudioPlayer } from "../components/AudioPlayer";
 import { MainTextContent } from "../components/MainTextContent"
 import EpubReader from "../components/EpubReader"
 import { localStorageAPI } from "../localStorageAPI"
 import { Box } from "@mui/material";
 import { set } from "lodash";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { useAppearanceSettings } from '../hooks/useAppearanceSettings';
+import { useAppThemes } from '../hooks/useAppThemes';
+import { SettingsContext } from '../contexts/SettingsContext';
+
 const { getConfig, saveConfig } = localStorageAPI();
 function splitTextToSentences(text, minWords = 10) {
     const sentences = text.match(/[^.!?]+[.!?]/g) || [text]; // Split based on sentence-ending punctuation
@@ -35,6 +41,13 @@ function splitTextToSentences(text, minWords = 10) {
 
 
 export function Main() {
+    const { settings, handleSettingsChange } = useAppearanceSettings();
+    const { appTheme, contentTheme } = useAppThemes(settings);
+
+    console.log({ settings, appTheme });
+
+
+    // Remove the theme creation code from here since it's now in useAppThemes
 
     const [audioChunks, setAudioChunks] = useState({});
     // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
@@ -169,70 +182,78 @@ export function Main() {
         }
     }
 
+    // Add progress calculations
+    const progressMetrics = {
+        current: currentChunkIndex + 1,
+        total: chunks.length,
+        remaining: Math.max(0, chunks.length - currentChunkIndex),
+        progress: chunks.length > 0 ? (currentChunkIndex / chunks.length) * 100 : 0
+    };
+
     return (
-        <div>
+        <ThemeProvider theme={appTheme}>
+            <CssBaseline />
+            <SettingsContext.Provider value={{ settings, handleSettingsChange }}>
+                <div>
+                    <div style={{
+                        height: '472px',
+                        overflowY: 'auto',
+                        borderBottom: '1px solid #eee'
+                    }}>
+                        <ThemeProvider theme={contentTheme}>
+                            <MainTextContent
+                                images={images}
+                                currentChunkIndex={currentChunkIndex}
+                                textChunks={chunks}
+                                timepoints={audioChunks[currentChunkIndex]?.timepoints}
+                                audio={audioChunks[currentChunkIndex]?.audio}
+                                onChunkSelect={handleChunkSelect}
+                                onChunksFinished={onChunksFinished}
+                                wordSpeed={wordSpeed}
+                            />
+                        </ThemeProvider>
+                    </div>
 
-            <div
-                style={{
-                    padding: '20px',
-                    fontSize: '1.2rem',
-                    lineHeight: '1.6',
-                    height: '460px', // Adjust based on your layout
-                    overflowY: 'auto',
-                    borderBottom: '3px solid #eee'
-                }}
-            >
-
-                <MainTextContent
-
-                    images={images}
-                    currentChunkIndex={currentChunkIndex}
-                    textChunks={chunks}
-                    timepoints={audioChunks[currentChunkIndex]?.timepoints}
-                    audio={audioChunks[currentChunkIndex]?.audio}
-                    onChunkSelect={handleChunkSelect}
-                    onChunksFinished={onChunksFinished}
-                    wordSpeed={wordSpeed}
-                />
-            </div>
-
-
-
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '10px',
-                backgroundColor: '#282828',
-                color: 'white',
-                position: 'fixed',
-                bottom: 10,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-            }}>
-                <AudioPlayer
-                    displayedText={`Chapter ${currentChapterIndex}: ${chapters[currentChapterIndex]?.chapterName}`}
-                    currentChapterIndex={currentChapterIndex}
-                    currentChapterName={chapters[currentChapterIndex]?.chapterName}
-                    onPrevChapter={() => setCurrentChapterIndex(prev => Math.max(0, prev - 1))}
-                    onNextChapter={() => setCurrentChapterIndex(prev => Math.min(chapters.length - 1, prev + 1))}
-                    playbackSpeed={playbackSpeed}
-                    setPlaybackSpeed={setPlaybackSpeed}
-                    onWordSpeedChanged={onWordSpeedChanged}
-                    wordSpeed={wordSpeed}
-                    audio={audioChunks[currentChunkIndex]?.audio}
-                    onEnded={() => onAudioFinished()}
-                    onPrev={() => setCurrentChunkIndex(currentChunkIndex - 1)}
-                    onNext={() => setCurrentChunkIndex(currentChunkIndex + 1)}
-                    selectedVoice={selectedVoice}
-                    onVoiceChange={(voice) => {
-                        setSelectedVoice(voice);
-                        // Clear audio chunks to force regeneration with new voice
-                        setAudioChunks({});
-                    }}
-                />
-            </div>
-        </div>
+                    {/* Audio player remains unchanged, using base theme */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '10px',
+                        backgroundColor: '#282828',  // Back to dark background
+                        color: 'white',  // Always white text
+                        position: 'fixed',
+                        bottom: 10,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        boxShadow: '0 -2px 8px rgba(0,0,0,0.1)'
+                    }}>
+                        <AudioPlayer
+                            displayedText={`Chapter ${currentChapterIndex}: ${chapters[currentChapterIndex]?.chapterName}`}
+                            currentChapterIndex={currentChapterIndex}
+                            currentChapterName={chapters[currentChapterIndex]?.chapterName}
+                            onPrevChapter={() => setCurrentChapterIndex(prev => Math.max(0, prev - 1))}
+                            onNextChapter={() => setCurrentChapterIndex(prev => Math.min(chapters.length - 1, prev + 1))}
+                            playbackSpeed={playbackSpeed}
+                            setPlaybackSpeed={setPlaybackSpeed}
+                            onWordSpeedChanged={onWordSpeedChanged}
+                            wordSpeed={wordSpeed}
+                            audio={audioChunks[currentChunkIndex]?.audio}
+                            onEnded={() => onAudioFinished()}
+                            onPrev={() => setCurrentChunkIndex(currentChunkIndex - 1)}
+                            onNext={() => setCurrentChunkIndex(currentChunkIndex + 1)}
+                            selectedVoice={selectedVoice}
+                            onVoiceChange={(voice) => {
+                                setSelectedVoice(voice);
+                                // Clear audio chunks to force regeneration with new voice
+                                setAudioChunks({});
+                            }}
+                            progressMetrics={progressMetrics}
+                        />
+                    </div>
+                </div>
+            </SettingsContext.Provider>
+        </ThemeProvider>
     )
 }
