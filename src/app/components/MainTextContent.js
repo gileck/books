@@ -1,18 +1,45 @@
-import { Box, Slider } from '@mui/material';
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { Box, Slider, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+
+const WINDOW_SIZE = 10; // Number of sentences to show above and below
 
 export function MainTextContent({ images, wordSpeed, timepoints, audio, currentChunkIndex, textChunks, onChunkSelect, onChunksFinished }) {
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
+    const [isInitialScrollComplete, setIsInitialScrollComplete] = useState(false);
+
+    const [visibleRange, setVisibleRange] = useState({
+        start: Math.max(0, currentChunkIndex - WINDOW_SIZE),
+        end: currentChunkIndex + WINDOW_SIZE
+    });
+
+    console.log({ currentChunkIndex, visibleRange });
+
+
+    const topLoaderRef = useRef(null);
+    const bottomLoaderRef = useRef(null);
+    const containerRef = useRef(null);
+    const topTriggerRef = useRef(null);
+    const bottomTriggerRef = useRef(null);
 
     useLayoutEffect(() => {
+        if (isInitialScrollComplete) return;
         const element = document.getElementById(`chunk-${currentChunkIndex}`);
+
         if (element) {
+            setIsInitialScrollComplete(false); // Reset before new scroll
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Wait for smooth scroll to complete
+            const timer = setTimeout(() => {
+                setIsInitialScrollComplete(true);
+            }, 2000); // Adjust timing based on your scroll animation duration
+
+            return () => clearTimeout(timer);
         }
 
-    }, [currentChunkIndex, textChunks.length])
+    }, [currentChunkIndex, textChunks.length, visibleRange.start, visibleRange.end]);
 
     useEffect(() => {
         if (!audio) return;
@@ -72,6 +99,71 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
         return () => audio.removeEventListener('timeupdate', handleTimeUpdate);
     }, [audio, timepoints]);
 
+    useEffect(() => {
+        if (!isInitialScrollComplete) return; // Don't setup observer until initial scroll is done
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target === topLoaderRef.current) {
+                            // Load more content at the top
+                            setVisibleRange(prev => ({
+                                start: Math.max(0, prev.start - WINDOW_SIZE),
+                                end: prev.end
+                            }));
+                        } else if (entry.target === bottomLoaderRef.current) {
+                            // Load more content at the bottom
+                            setVisibleRange(prev => ({
+                                start: prev.start,
+                                end: Math.min(textChunks.length, prev.end + WINDOW_SIZE)
+                            }));
+                        }
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        if (topLoaderRef.current) observer.observe(topLoaderRef.current);
+        if (bottomLoaderRef.current) observer.observe(bottomLoaderRef.current);
+
+        return () => observer.disconnect();
+    }, [isInitialScrollComplete, textChunks.length]);
+
+    // Add scroll monitoring effect
+    useEffect(() => {
+        if (!isInitialScrollComplete || !containerRef.current) return;
+
+        const options = {
+            root: containerRef.current,
+            threshold: 0.1,
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+
+                if (entry.target === topTriggerRef.current && visibleRange.start > 0) {
+                    setVisibleRange(prev => ({
+                        start: Math.max(0, prev.start - WINDOW_SIZE),
+                        end: prev.end
+                    }));
+                } else if (entry.target === bottomTriggerRef.current && visibleRange.end < textChunks.length) {
+                    setVisibleRange(prev => ({
+                        start: prev.start,
+                        end: Math.min(textChunks.length, prev.end + WINDOW_SIZE)
+                    }));
+                }
+            });
+        }, options);
+
+        if (topTriggerRef.current) observer.observe(topTriggerRef.current);
+        if (bottomTriggerRef.current) observer.observe(bottomTriggerRef.current);
+
+        return () => observer.disconnect();
+    }, [isInitialScrollComplete, visibleRange.start, visibleRange.end, textChunks.length]);
+
     const handleWordDoubleClick = (chunkIndex) => {
         if (onChunkSelect) {
             onChunkSelect(chunkIndex);
@@ -118,26 +210,34 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
 
     return (
-        <div style={{
-            padding: '20px',
-            fontSize: '1.2rem',
-            lineHeight: '1.6',
-            marginBottom: '60px'
-        }}>
+        <div
+            ref={containerRef}
+            style={{
+                padding: '20px',
+                fontSize: '1.2rem',
+                lineHeight: '1.6',
+                marginBottom: '60px',
+                height: 'calc(100vh - 150px)', // Adjust based on your layout
+                overflowY: 'auto'
+            }}
+        >
+            <div ref={topTriggerRef} style={{ height: '10px' }} />
 
+            {textChunks
+                .slice(visibleRange.start, visibleRange.end)
+                .map((text, localIndex) => {
+                    const globalIndex = localIndex + visibleRange.start;
+                    return (
+                        <div key={globalIndex} id={`chunk-${globalIndex}`}>
+                            {text.startsWith('Image ') && didImagesLoaded
+                                ? <ImageBox text={text} images={images} render={() => renderWords(text, globalIndex)} />
+                                : renderWords(text, globalIndex)
+                            }
+                        </div>
+                    );
+                })}
 
-            {textChunks.map((text, chunkIndex) => (
-
-                <div key={chunkIndex} id={`chunk-${chunkIndex}`}>
-
-                    {
-                        text.startsWith('Image ') && didImagesLoaded ? <ImageBox text={text} images={images} render={() => renderWords(text, chunkIndex)} /> : renderWords(text, chunkIndex)
-                    }
-                </div>
-
-
-            ))}
-
+            <div ref={bottomTriggerRef} style={{ height: '10px' }} />
         </div>
     );
 }
