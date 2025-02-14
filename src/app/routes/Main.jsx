@@ -54,6 +54,7 @@ export function Main() {
 
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
+    const [selectedVoice, setSelectedVoice] = useState(getConfig('selectedVoice') || 'en-US-Neural2-A');
 
     useEffect(() => {
         setCurrentChunkIndex(currentChunkIndexByChapter[currentChapterIndex] || 0)
@@ -69,6 +70,9 @@ export function Main() {
         saveConfig('playbackSpeed', playbackSpeed);
     }, [currentChunkIndex, currentChapterIndex, wordSpeed, playbackSpeed]);
 
+    useEffect(() => {
+        saveConfig('selectedVoice', selectedVoice);
+    }, [selectedVoice]);
 
     function onWordSpeedChanged(speed) {
         setWordSpeed(speed);
@@ -84,7 +88,6 @@ export function Main() {
         shouldUsecache: false
     })
 
-    const didImagesLoaded = images && Object.keys(images).length > 0;
 
 
 
@@ -115,7 +118,10 @@ export function Main() {
                 shouldUsecache: false,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: chunks[index] })
+                body: JSON.stringify({
+                    text: chunks[index],
+                    voice: selectedVoice
+                })
             });
 
             if (data?.audioContent && !audioChunks[index]) {
@@ -133,7 +139,7 @@ export function Main() {
         if (currentChunkIndex < chunks.length - 1) {
             fetchChunk(currentChunkIndex + 1);
         }
-    }, [currentChunkIndex, chunks]);
+    }, [currentChunkIndex, chunks, selectedVoice]);
 
     const handleChunkSelect = (index) => {
         // console.log({ index });
@@ -182,6 +188,7 @@ export function Main() {
                 </h1>
             </Box>
             <MainTextContent
+
                 images={images}
                 currentChunkIndex={currentChunkIndex}
                 textChunks={chunks}
@@ -214,6 +221,12 @@ export function Main() {
                     onEnded={() => onAudioFinished()}
                     onPrev={() => setCurrentChunkIndex(currentChunkIndex - 1)}
                     onNext={() => setCurrentChunkIndex(currentChunkIndex + 1)}
+                    selectedVoice={selectedVoice}
+                    onVoiceChange={(voice) => {
+                        setSelectedVoice(voice);
+                        // Clear audio chunks to force regeneration with new voice
+                        setAudioChunks({});
+                    }}
                 />
             </div>
         </div>

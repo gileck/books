@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton, Slider, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { IconButton, Slider, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -10,13 +10,22 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, SkipNext } from '@mui/icons-material';
 
-export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed }) {
+export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     // console.log({ isPlaying, audio });
 
     const [volume, setVolume] = React.useState(30);
     const [speedDialogOpen, setSpeedDialogOpen] = React.useState(false);
     const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
+
+    const voices = [
+        { id: 'en-US-Neural2-A', name: 'Female 1' },
+        { id: 'en-US-Neural2-C', name: 'Female 2' },
+        { id: 'en-US-Neural2-D', name: 'Male 1' },
+        { id: 'en-US-Neural2-F', name: 'Male 2' },
+        { id: 'en-US-Neural2-H', name: 'Female 3' },
+        { id: 'en-US-Neural2-I', name: 'Male 3' },
+    ];
 
     useEffect(() => {
         if (audio) {
@@ -305,7 +314,20 @@ export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onP
             <Dialog open={optionsDialogOpen} onClose={toggleOptionsDialog}>
                 <DialogTitle>Options</DialogTitle>
                 <DialogContent>
-                    {/* Add extra options here */}
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Voice</InputLabel>
+                        <Select
+                            value={selectedVoice}
+                            onChange={(e) => onVoiceChange(e.target.value)}
+                            label="Voice"
+                        >
+                            {voices.map((voice) => (
+                                <MenuItem key={voice.id} value={voice.id}>
+                                    {voice.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={toggleOptionsDialog} color="primary">

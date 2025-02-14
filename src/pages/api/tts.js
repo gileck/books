@@ -2,13 +2,12 @@ import { synthesizeSpeech } from '../../textToSpeech';
 
 export default async function handler(req, res) {
     try {
-        const { text } = req.body;
-        const data = await synthesizeSpeech(text);
-        res.setHeader("Content-Type", "audio/mpeg"); // or audio/wav depending on encoding
-
-        res.status(200).send(data);
+        const { text, voice } = req.body;
+        const data = await synthesizeSpeech(text, voice);
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).json(data);
     } catch (error) {
-        console.log(error);
+        console.error('TTS Error:', error);
         res.status(500).json({ error: 'Error synthesizing speech' });
     }
 }

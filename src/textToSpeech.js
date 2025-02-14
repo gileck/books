@@ -24,26 +24,22 @@ function generateSSMLWithMarks(text) {
     return ssml;
 }
 
-export async function synthesizeSpeech(text) {
+export async function synthesizeSpeech(text, voiceId = 'en-US-Neural2-F') {
     const textWithMarks = generateSSMLWithMarks(text)
-    // console.log({ textWithMarks });
 
     const request = {
         enableTimePointing: ['SSML_MARK'],
         input: {
-            ssml: `<speak>
-            ${textWithMarks}
-            </speak>`
+            ssml: `<speak>${textWithMarks}</speak>`
         },
         voice: {
             languageCode: 'en-US',
-            name: 'en-US-Wavenet-F'
+            name: voiceId // Use the provided voice ID
         },
         audioConfig: { audioEncoding: 'MP3' },
     };
 
     const [response] = await client.synthesizeSpeech(request);
-    // console.log({ response });
 
     return {
         audioContent: response.audioContent.toString('base64'),
