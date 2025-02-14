@@ -215,7 +215,7 @@ export function Main() {
             <SettingsContext.Provider value={{ settings, handleSettingsChange }}>
                 <div>
                     <div style={{
-                        height: '472px',
+                        height: '475px',
                         overflowY: 'auto',
                         borderBottom: '1px solid #eee'
                     }}>
