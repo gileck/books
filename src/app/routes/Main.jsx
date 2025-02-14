@@ -171,44 +171,48 @@ export function Main() {
 
     return (
         <div>
-            <Box
-                sx={{
-                    background: 'white',
-                    padding: '1rem',
-                    borderBottom: '1px solid #eee',
-                    textAlign: 'center'
+
+            <div
+                style={{
+                    padding: '20px',
+                    fontSize: '1.2rem',
+                    lineHeight: '1.6',
+                    height: '460px', // Adjust based on your layout
+                    overflowY: 'auto',
+                    borderBottom: '3px solid #eee'
                 }}
             >
-                <h2>
-                    Chapter {currentChapterIndex}
-                </h2>
-                <h1>
 
-                    {chapters[currentChapterIndex]?.chapterName}
-                </h1>
-            </Box>
-            <MainTextContent
+                <MainTextContent
 
-                images={images}
-                currentChunkIndex={currentChunkIndex}
-                textChunks={chunks}
-                timepoints={audioChunks[currentChunkIndex]?.timepoints}
-                audio={audioChunks[currentChunkIndex]?.audio}
-                onChunkSelect={handleChunkSelect}
-                onChunksFinished={onChunksFinished}
-                wordSpeed={wordSpeed}
-            />
+                    images={images}
+                    currentChunkIndex={currentChunkIndex}
+                    textChunks={chunks}
+                    timepoints={audioChunks[currentChunkIndex]?.timepoints}
+                    audio={audioChunks[currentChunkIndex]?.audio}
+                    onChunkSelect={handleChunkSelect}
+                    onChunksFinished={onChunksFinished}
+                    wordSpeed={wordSpeed}
+                />
+            </div>
+
+
 
             <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10px',
+                backgroundColor: '#282828',
+                color: 'white',
                 position: 'fixed',
-                bottom: 0,
+                bottom: 10,
                 left: 0,
                 right: 0,
-                background: 'white',
-                padding: '1rem',
-                borderTop: '1px solid #eee'
+                zIndex: 1000,
             }}>
                 <AudioPlayer
+                    displayedText={`Chapter ${currentChapterIndex}: ${chapters[currentChapterIndex]?.chapterName}`}
                     currentChapterIndex={currentChapterIndex}
                     currentChapterName={chapters[currentChapterIndex]?.chapterName}
                     onPrevChapter={() => setCurrentChapterIndex(prev => Math.max(0, prev - 1))}

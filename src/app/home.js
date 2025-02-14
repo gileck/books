@@ -180,7 +180,7 @@ export function Home({ user }) {
           }}>
           </div>
         </div>
-        <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+        {/* <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
           <Box sx={{
             minWidth: 380,
             marginBottom: '10px',
@@ -206,7 +206,7 @@ export function Home({ user }) {
               }
             </BottomNavigation>
           </Box>
-        </Paper>
+        </Paper> */}
         <FloaingAlert />
         <Menu onRouteChanged={setInernalRoute} menuOpen={menuOpen} toggleDrawer={toggleDrawer} />
       </AppProvider>

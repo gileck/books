@@ -10,7 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, SkipNext } from '@mui/icons-material';
 
-export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
+export function AudioPlayer({ displayedText, currentChapterName, wordSpeed, audio, onEnded, onPrev, onPrevChapter, onNextChapter, onNext, onWordSpeedChanged, playbackSpeed, setPlaybackSpeed, selectedVoice, onVoiceChange }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     // console.log({ isPlaying, audio });
 
@@ -164,19 +164,21 @@ export function AudioPlayer({ currentChapterName, wordSpeed, audio, onEnded, onP
     }, [audio]);
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '10px',
-            backgroundColor: '#282828',
-            color: 'white',
-            position: 'fixed',
-            bottom: 67,
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-        }}>
+        <div>
+            <Typography
+                variant="subtitle1"
+                style={{
+                    color: 'white',
+                    textAlign: 'center',
+                    marginBottom: '10px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '300px'
+                }}
+            >
+                {displayedText}
+            </Typography>
             <Grid container alignItems="center" justifyContent="center">
 
                 <Grid item>

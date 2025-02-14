@@ -14,9 +14,6 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
         end: currentChunkIndex + WINDOW_SIZE
     });
 
-    console.log({ currentChunkIndex, visibleRange });
-
-
     const topLoaderRef = useRef(null);
     const bottomLoaderRef = useRef(null);
     const containerRef = useRef(null);
@@ -212,14 +209,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     return (
         <div
             ref={containerRef}
-            style={{
-                padding: '20px',
-                fontSize: '1.2rem',
-                lineHeight: '1.6',
-                marginBottom: '60px',
-                height: 'calc(100vh - 150px)', // Adjust based on your layout
-                overflowY: 'auto'
-            }}
+
         >
             <div ref={topTriggerRef} style={{ height: '10px' }} />
 
