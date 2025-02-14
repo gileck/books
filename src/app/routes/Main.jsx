@@ -49,13 +49,13 @@ export function Main() {
     // Remove the theme creation code from here since it's now in useAppThemes
 
     const [audioChunks, setAudioChunks] = useState({});
+    
     // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
     const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
     const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({
         [currentChapterIndex]: getConfig('currentChunkIndex') || 0
     });
     const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0
-    // console.log({ currentChunkIndex });
     const setCurrentChunkIndex = (index) => {
         setCurrentChunkIndexByChapter(prev => ({
             ...prev,
@@ -154,15 +154,9 @@ export function Main() {
     }, [currentChunkIndex, chunks, selectedVoice]);
 
     const handleChunkSelect = (index) => {
-        // console.log({ index });
-
         // Pause current audio if playing
         if (audioChunks[currentChunkIndex]?.audio) {
             audioChunks[currentChunkIndex].audio.pause();
-            audioChunks[currentChunkIndex].audio.currentTime = 0;
-        }
-        if (index === currentChunkIndex) {
-            audioChunks[currentChunkIndex].audio.play()
             audioChunks[currentChunkIndex].audio.currentTime = 0;
         }
         setCurrentChunkIndex(index);
@@ -179,6 +173,7 @@ export function Main() {
         if (audioChunks[currentChunkIndex]?.audio && currentChunkIndex === chunks.length - 1) {
             audioChunks[currentChunkIndex].audio.pause();
         }
+        
     }
 
     // Add progress calculations

@@ -36,7 +36,7 @@ export function AudioPlayer({
     onAddBookmark,
     onBookmarkSelect,
     onRemoveBookmark,
-    isBookmarked = () => false
+    isBookmarked
 }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [speedDialogOpen, setSpeedDialogOpen] = useState(false);
@@ -44,6 +44,14 @@ export function AudioPlayer({
     const [appearanceDialogOpen, setAppearanceDialogOpen] = useState(false);
     const [bookmarksDialogOpen, setBookmarksDialogOpen] = useState(false);
     const [bookmarkNameDialogOpen, setBookmarkNameDialogOpen] = useState(false);
+
+    useEffect(() => {
+        if (!audio) return;
+        if (audio.paused && isPlaying) {
+            audio.play();
+        }
+    }, [audio, isPlaying]);
+
 
     useEffect(() => {
         if (!audio) return;
