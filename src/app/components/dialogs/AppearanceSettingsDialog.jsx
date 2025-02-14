@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAppearanceSettings } from '../hooks/useAppearanceSettings';
-import { useSettings } from '../contexts/SettingsContext';
+import { useAppearanceSettings } from '../../hooks/useAppearanceSettings';
+import { useSettings } from '../../contexts/SettingsContext';
 import {
     Dialog,
     DialogTitle,
