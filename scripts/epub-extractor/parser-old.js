@@ -80,8 +80,8 @@ function removeLinesWithNumbersOnly(lines) {
 }
 
 function combineIncompleteSentences(lines) {
-    // lines = combineIncompleteSentencesInternal(lines, true);
-    // lines = combineIncompleteSentencesInternal(lines, false);
+    lines = combineIncompleteSentencesInternal(lines, true);
+    lines = combineIncompleteSentencesInternal(lines, false);
     return lines;
 }
 function combineIncompleteSentencesInternal(lines, shouldRunOnImages) {

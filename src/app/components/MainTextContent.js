@@ -5,6 +5,8 @@ import { ReaderContent } from './ReaderContent';
 import { useTheme } from '@mui/material/styles';
 import { useSettings } from '../contexts/SettingsContext';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { SelectionFAB } from './SelectionFAB';
+import { TextQuestionPanel } from './TextQuestionPanel';
 
 const WINDOW_SIZE = 10; // Number of sentences to show above and below
 
@@ -14,6 +16,9 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [isInitialScrollComplete, setIsInitialScrollComplete] = useState(false);
     const [isCurrentChunkVisible, setIsCurrentChunkVisible] = useState(true);
+    const [selectedText, setSelectedText] = useState('');
+    const [showSelectionFAB, setShowSelectionFAB] = useState(false);
+    const [questionPanel, setQuestionPanel] = useState(null);
 
     const theme = useTheme();
     const { settings } = useSettings();
@@ -164,6 +169,46 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
         return () => observer.disconnect();
     }, [currentChunkIndex, containerRef.current, textChunks.length]);
 
+    useEffect(() => {
+        const handleSelection = () => {
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+            setSelectedText(text);
+            setShowSelectionFAB(text.length > 0);
+        };
+
+        document.addEventListener('selectionchange', handleSelection);
+        return () => document.removeEventListener('selectionchange', handleSelection);
+    }, []);
+
+    const handleQuestionAction = (actionType, customQuestion = '') => {
+        // Get the last 3 sentences including the selected one
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        const selectedElement = range.startContainer.parentElement;
+        const chunkElement = selectedElement.closest('[id^="chunk-"]');
+        const chunkId = chunkElement?.id;
+        const currentIndex = chunkId ? parseInt(chunkId.split('-')[1]) : currentChunkIndex;
+
+        // Get up to 2 previous chunks for context
+        const contextStartIndex = Math.max(0, currentIndex - 2);
+        const contextChunks = textChunks.slice(contextStartIndex, currentIndex + 1);
+
+        setQuestionPanel({
+            text: selectedText,
+            type: actionType,
+            question: customQuestion,
+            context: {
+                chapterName: `Chapter ${currentChapterIndex}`,
+                contextText: contextChunks.join(' ')
+            }
+        });
+
+        // Clear selection after action
+        window.getSelection().removeAllRanges();
+        setShowSelectionFAB(false);
+    };
+
     const scrollToCurrentChunk = () => {
         const element = document.getElementById(`chunk-${currentChunkIndex}`);
         if (element) {
@@ -277,6 +322,21 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                     <VerticalAlignCenterIcon />
                 </Fab>
             )}
+
+            <SelectionFAB
+                selectedText={selectedText}
+                visible={showSelectionFAB}
+                onAction={handleQuestionAction}
+            />
+
+            <TextQuestionPanel
+                open={!!questionPanel}
+                selectedText={questionPanel?.text}
+                questionType={questionPanel?.type}
+                question={questionPanel?.question}
+                context={questionPanel?.context}
+                onClose={() => setQuestionPanel(null)}
+            />
         </Box>
     );
 }
