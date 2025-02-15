@@ -99,7 +99,7 @@ export function AudioPlayer({
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto', p: 2 }}>
+        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto',  }}>
             {/* Progress Display */}
             <Typography
                 variant="subtitle1"

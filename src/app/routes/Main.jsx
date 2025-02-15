@@ -212,7 +212,7 @@ export function Main() {
             <SettingsContext.Provider value={{ settings, handleSettingsChange }}>
                 <div>
                     <div style={{
-                        height: '72vh',
+                        height: '73vh',
                         overflowY: 'auto',
                         borderBottom: '1px solid #eee'
                     }}>
@@ -238,13 +238,14 @@ export function Main() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '10px',
+                        paddingTop: '2px',
                         backgroundColor: '#282828',  // Back to dark background
                         color: 'white',  // Always white text
                         position: 'fixed',
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: '22vh',
+                        height: '19vh',
                         zIndex: 1000,
                         boxShadow: '0 -2px 8px rgba(0,0,0,0.1)'
                     }}>

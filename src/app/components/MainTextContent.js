@@ -265,8 +265,9 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                     onClick={scrollToCurrentChunk}
                     sx={{
                         position: 'fixed',
-                        bottom: 80,
-                        right: 16,
+                        bottom: '25vh',  // Adjust to be above the audio player
+                        right: '5%',
+                        transform: 'translateX(-50%)',
                         zIndex: 100000
                     }}
                 >
