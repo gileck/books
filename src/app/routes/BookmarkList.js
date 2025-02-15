@@ -81,6 +81,9 @@ export function BookmarkList() {
                                 secondary={
                                     <>
                                         <Typography variant="caption" display="block">
+                                            Chapter {bookmark.chapterIndex}
+                                        </Typography>
+                                        <Typography variant="caption" display="block">
                                             {new Date(bookmark.timestamp).toLocaleString()}
                                         </Typography>
                                         {bookmark.sentence?.slice(0, 50)}...

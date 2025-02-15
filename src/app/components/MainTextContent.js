@@ -33,12 +33,15 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
         if (element) {
             setIsInitialScrollComplete(false); // Reset before new scroll
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            wait(500).then(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
 
             // Wait for smooth scroll to complete
             const timer = setTimeout(() => {
                 setIsInitialScrollComplete(true);
-            }, 2000); // Adjust timing based on your scroll animation duration
+            }, 2500); // Adjust timing based on your scroll animation duration
 
             return () => clearTimeout(timer);
         }

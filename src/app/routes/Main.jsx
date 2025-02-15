@@ -50,10 +50,6 @@ export function Main() {
     const { setRoute, params, bookmarks: { bookmarks, addBookmark, removeBookmark, isBookmarked } } = useContext(AppContext);
 
     const { chapterIndex: chapterIndexFromParams, chunkIndex: chunkIndexFromParams } = params || {};
-    console.log({
-        chapterIndexFromParams,
-        chunkIndexFromParams
-    });
 
 
 
@@ -70,7 +66,7 @@ export function Main() {
         [currentChapterIndex]: Number(chunkIndexFromParams) || getConfig('currentChunkIndex') || 0
     });
     const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0
-    console.log({ currentChunkIndex });
+    // console.log({ currentChunkIndex });
 
     const setCurrentChunkIndex = (index) => {
         setCurrentChunkIndexByChapter(prev => ({
@@ -254,9 +250,7 @@ export function Main() {
                             color="primary"
                             variant="extended"
                             onClick={() => {
-                                setRoute('', {})
-                                setCurrentChunkIndex(getConfig('currentChunkIndex') || 0)
-                                setCurrentChapterIndex(getConfig('currentChapterIndex') || 0)
+                                window.location.href = '/';
                             }}
                             sx={{
                                 position: 'fixed',
