@@ -148,7 +148,7 @@ export function Main() {
     const chapters = Object.entries(data).map(([key, value]) => ({ chapterName: key, lines: value }));
 
     // console.log({ chapters });
-    const chunks = splitLinesToChunks(chapters[currentChapterIndex].lines) || []
+    const chunks = splitLinesToChunks(chapters[currentChapterIndex]?.lines || [])
     console.log({ chunks });
 
 
