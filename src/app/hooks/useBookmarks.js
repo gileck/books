@@ -6,21 +6,25 @@ const { getConfig, saveConfig } = localStorageAPI();
 export function useBookmarks() {
     const [bookmarks, setBookmarks] = useState(getConfig('bookmarks') || []);
 
-    const addBookmark = (chapterIndex, chunkIndex, chapterName, previewText, name) => {
+    const addBookmark = (chapterIndex, chunkIndex, chapterName, sentence, name) => {
         const newBookmark = {
+            sentence,
             id: Date.now(),
             chapterIndex,
             chunkIndex,
             chapterName,
             name,
-            previewText: previewText.substring(0, 100) + '...',
             timestamp: new Date().toISOString()
         };
         setBookmarks(prev => [...prev, newBookmark]);
     };
 
     const removeBookmark = (id) => {
-        setBookmarks(prev => prev.filter(b => b.id !== id));
+        if (confirm('Are you sure you want to delete this bookmark?')) {
+            setBookmarks(prev => prev.filter(b => b.id !== id));
+            return true;
+        }
+        return false;
     };
 
     const toggleBookmark = (chapterIndex, chunkIndex, chapterName, previewText, name) => {
@@ -30,10 +34,10 @@ export function useBookmarks() {
 
         if (existingBookmark) {
             removeBookmark(existingBookmark.id);
-            return false; // Returns false if bookmark was removed
+            return false;
         } else {
             addBookmark(chapterIndex, chunkIndex, chapterName, previewText, name);
-            return true; // Returns true if bookmark was added
+            return true;
         }
     };
 
@@ -41,9 +45,15 @@ export function useBookmarks() {
         return bookmarks.some(b => b.chapterIndex === chapterIndex && b.chunkIndex === chunkIndex);
     };
 
+    const updateBookmarkName = (id, newName) => {
+        setBookmarks(prev => prev.map(bookmark =>
+            bookmark.id === id ? { ...bookmark, name: newName } : bookmark
+        ));
+    };
+
     useEffect(() => {
         saveConfig('bookmarks', bookmarks);
     }, [bookmarks]);
 
-    return { bookmarks, addBookmark, removeBookmark, isBookmarked, toggleBookmark };
+    return { bookmarks, addBookmark, removeBookmark, isBookmarked, toggleBookmark, updateBookmarkName };
 }

@@ -2,8 +2,7 @@ import React, { useState, useEffect, createContext } from 'react';
 import { localStorageAPI } from './localStorageAPI';
 import { AppContext } from './AppContext';
 import { useFetch } from '../useFetch';
-
-
+import { useBookmarks } from './hooks/useBookmarks';
 
 function useQuestionBox() {
     const [isQuestionBoxOpen, setIsQuestionBoxOpen] = useState(false)
@@ -43,36 +42,31 @@ function useAlert() {
     }
 }
 
-
-
-
-
-
 export function AppProvider({ children, setRoute, params, user }) {
+    const alert = useAlert();
+    const questionBox = useQuestionBox();
+    const bookmarks = useBookmarks();
 
-
-
-    const alert = useAlert()
-    const questionBox = useQuestionBox()
     const contextValue = {
+        params,
         setRoute,
         questionBox,
         setIsAlertOpen: alert.setIsAlertOpen,
         openAlert: (message) => {
-            alert.setAlertMessage(message)
-            alert.setIsAlertOpen(true)
+            alert.setAlertMessage(message);
+            alert.setIsAlertOpen(true);
         },
         openErrorAlert: (message) => {
-            alert.setAlertMessage(message)
-            alert.setIsErrorAlertOpen(true)
+            alert.setAlertMessage(message);
+            alert.setIsErrorAlertOpen(true);
         },
         isErrorAlertOpen: alert.isErrorAlertOpen,
         closeAlert: () => {
-            alert.setIsAlertOpen(false)
-            alert.setIsErrorAlertOpen(false)
-        }
-    }
-    return <AppContext.Provider value={contextValue}>
-        {children}
-    </AppContext.Provider>
+            alert.setIsAlertOpen(false);
+            alert.setIsErrorAlertOpen(false);
+        },
+        bookmarks
+    };
+
+    return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 }

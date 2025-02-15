@@ -1,10 +1,10 @@
 import { fetchWithCache, useFetch } from "@/useFetch"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useContext } from "react"
 import { AudioPlayer } from "../components/AudioPlayer";
 import { MainTextContent } from "../components/MainTextContent"
 import EpubReader from "../components/EpubReader"
 import { localStorageAPI } from "../localStorageAPI"
-import { Box } from "@mui/material";
+import { Box, Fab } from "@mui/material";
 import { set } from "lodash";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,6 +12,8 @@ import { useAppearanceSettings } from '../hooks/useAppearanceSettings';
 import { useAppThemes } from '../hooks/useAppThemes';
 import { SettingsContext } from '../contexts/SettingsContext';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { AppContext } from "../AppContext";
+import ReplyIcon from '@mui/icons-material/Reply';
 
 const { getConfig, saveConfig } = localStorageAPI();
 function splitTextToSentences(text, minWords = 10) {
@@ -44,18 +46,32 @@ function splitTextToSentences(text, minWords = 10) {
 export function Main() {
     const { settings, handleSettingsChange } = useAppearanceSettings();
     const { appTheme, contentTheme } = useAppThemes(settings);
-    const { bookmarks, addBookmark, removeBookmark, isBookmarked, toggleBookmark } = useBookmarks();
+
+    const { setRoute, params, bookmarks: { bookmarks, addBookmark, removeBookmark, isBookmarked } } = useContext(AppContext);
+
+    const { chapterIndex: chapterIndexFromParams, chunkIndex: chunkIndexFromParams } = params || {};
+    console.log({
+        chapterIndexFromParams,
+        chunkIndexFromParams
+    });
+
+
+
+
+
 
     // Remove the theme creation code from here since it's now in useAppThemes
 
     const [audioChunks, setAudioChunks] = useState({});
 
     // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
-    const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
+    const [currentChapterIndex, setCurrentChapterIndex] = useState(Number(chapterIndexFromParams) || getConfig('currentChapterIndex') || 0);
     const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({
-        [currentChapterIndex]: getConfig('currentChunkIndex') || 0
+        [currentChapterIndex]: Number(chunkIndexFromParams) || getConfig('currentChunkIndex') || 0
     });
     const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0
+    console.log({ currentChunkIndex });
+
     const setCurrentChunkIndex = (index) => {
         setCurrentChunkIndexByChapter(prev => ({
             ...prev,
@@ -67,7 +83,6 @@ export function Main() {
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
     const [selectedVoice, setSelectedVoice] = useState(getConfig('selectedVoice') || 'en-US-Neural2-A');
-    console.log({ selectedVoice });
 
 
     useEffect(() => {
@@ -76,10 +91,12 @@ export function Main() {
     }, [currentChapterIndex])
 
     useEffect(() => {
-        if (currentChunkIndex > 0) {
+        if (currentChunkIndex > 0 && !chapterIndexFromParams) {
             saveConfig('currentChunkIndex', currentChunkIndex);
         }
-        saveConfig('currentChapterIndex', currentChapterIndex);
+        if (!chapterIndexFromParams) {
+            saveConfig('currentChapterIndex', currentChapterIndex);
+        }
         saveConfig('wordSpeed', wordSpeed);
         saveConfig('playbackSpeed', playbackSpeed);
     }, [currentChunkIndex, currentChapterIndex, wordSpeed, playbackSpeed]);
@@ -201,7 +218,7 @@ export function Main() {
                 currentChunkIndex,
                 chapters[currentChapterIndex]?.chapterName,
                 chunks[currentChunkIndex],
-                name
+                name || `Bookmark ${bookmarks.length + 1}`
             );
         }
     };
@@ -231,6 +248,27 @@ export function Main() {
                             />
                         </ThemeProvider>
                     </div>
+
+                    {chapterIndexFromParams !== undefined && chunkIndexFromParams !== undefined && (
+                        <Fab
+                            color="primary"
+                            variant="extended"
+                            onClick={() => {
+                                setRoute('', {})
+                                setCurrentChunkIndex(getConfig('currentChunkIndex') || 0)
+                                setCurrentChapterIndex(getConfig('currentChapterIndex') || 0)
+                            }}
+                            sx={{
+                                position: 'fixed',
+                                bottom: '25vh',
+                                right: '25%',
+                                zIndex: 100000
+                            }}
+                        >
+                            <ReplyIcon sx={{ mr: 1 }} />
+                            Return to Current
+                        </Fab>
+                    )}
 
                     {/* Audio player remains unchanged, using base theme */}
                     <div style={{

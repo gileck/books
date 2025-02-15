@@ -83,6 +83,7 @@ export function Home({ user }) {
 
   ]
   const [route, setValue] = React.useState('');
+  const [params, setParams] = React.useState({});
 
   function setInernalRoute(route, params) {
     if (typeof window === 'undefined') return;
@@ -90,7 +91,11 @@ export function Home({ user }) {
     url.search = '';
     url.searchParams.set("route", route);
 
-    if (params) {
+    if (Object.keys(params || {}).length === 0) {
+      url.searchParams.delete("params");
+    }
+
+    if (Object.keys(params || {}).length > 0) {
       for (const key in params) {
         url.searchParams.set(key, params[key]);
       }
@@ -98,6 +103,7 @@ export function Home({ user }) {
 
     history.pushState({}, '', url.toString());
     setValue(route);
+    setParams(params);
   }
 
   function setRoute(newValue) {
@@ -108,11 +114,11 @@ export function Home({ user }) {
   function getParams() {
     if (typeof window === 'undefined') return;
     const url = new URL(window.location);
-    const params = {};
+    const paramsFromQuery = {};
     for (const key of url.searchParams.keys()) {
-      params[key] = url.searchParams.get(key);
+      paramsFromQuery[key] = url.searchParams.get(key);
     }
-    return params;
+    return paramsFromQuery;
   }
 
   useEffect(() => {

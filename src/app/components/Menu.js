@@ -1,14 +1,12 @@
 import React from 'react';
 import { ListItem, Button, Alert, Drawer, IconButton, List, Paper, Snackbar, ListItemButton, ListItemIcon, ListItemText, Box, Divider } from "@mui/material";
-import { Assistant, Home, People, Timeline, TrendingUp } from '@mui/icons-material'; // Add TrendingUp import
+import { Assistant, Home, People, Timeline, TrendingUp, Bookmark } from '@mui/icons-material'; // Add Bookmark import
 
 export const Menu = ({ menuOpen, toggleDrawer, onRouteChanged }) => {
-    const menuItems = [{
-        text: 'Home',
-        Icon: <Home />,
-        route: '',
-    }]
-
+    const menuItems = [
+        { text: 'Home', Icon: <Home />, route: '' },
+        { text: 'Bookmarks', Icon: <Bookmark />, route: 'bookmark-list' } // Add new menu item
+    ];
 
     return (
         <div>
@@ -36,10 +34,9 @@ export const Menu = ({ menuOpen, toggleDrawer, onRouteChanged }) => {
                                 </ListItem>
                             ))}
                         </List>
-
                     </Box>
                 </Drawer>
             </React.Fragment>
         </div>
-    )
-}
+    );
+};

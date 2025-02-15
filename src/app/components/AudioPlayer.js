@@ -91,11 +91,12 @@ export function AudioPlayer({
     };
 
     const handleBookmarkClick = () => {
-        if (isCurrentSentenceBookmarked()) {
-            onAddBookmark(); // This will now remove the bookmark
-        } else {
-            setBookmarkNameDialogOpen(true);
-        }
+        onAddBookmark();
+        // if (isCurrentSentenceBookmarked()) {
+        //     onAddBookmark(); // This will now remove the bookmark
+        // } else {
+        //     setBookmarkNameDialogOpen(true);
+        // }
     };
 
     return (

@@ -26,8 +26,6 @@ export function SpeedSettingsDialog({
     selectedVoice,
     onVoiceChange
 }) {
-    console.log({selectedVoice});
-    
     return (
         <Dialog
             open={open}
