@@ -99,7 +99,7 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages = false) {
                 if (lines[i + j].startsWith('Image ')) {
                     continue
                 }
-                if (/^[a-z]|\(/.test(lines[i + j]) && !lines[i + j].startsWith('Image ')) {
+                if (/^[a-z]|I|\(/.test(lines[i + j]) && !lines[i + j].startsWith('Image ')) {
                     // console.log("Line continues: ", lines[i + j]);
 
                     if (isEndsWithSlash) {
