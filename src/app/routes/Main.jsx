@@ -16,7 +16,19 @@ import { AppContext } from "../AppContext";
 import ReplyIcon from '@mui/icons-material/Reply';
 
 const { getConfig, saveConfig } = localStorageAPI();
-function splitTextToSentences(text, minWords = 10) {
+function splitLinesToChunks(lines) {
+    const chunks = [];
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('Image ')) {
+            chunks.push(line);
+        } else {
+            chunks.push(...splitTextToSentences(line));
+        }
+    }
+    return chunks;
+}
+function splitTextToSentences(text, minWords = 5) {
     const sentences = text.match(/[^.!?]+[.!?]/g) || [text]; // Split based on sentence-ending punctuation
     let result = [];
     let buffer = "";
@@ -123,14 +135,21 @@ export function Main() {
     // console.log({ data });
     // const text = data.chapters ? data.chapters[currentChapterIndex].content.map(c => c.text).join(' ') : '';
     // console.log(data);
-    const chapters = Object.entries(data).map(([key, value]) => ({ chapterName: key, text: value.join('\n') }));
+    function markImages(lines) {
+        return lines.map(line => {
+            if (line.startsWith('Image ')) {
+                return line = line + ' [END_IMAGE]';
+            }
+            return line;
+        })
+    }
+
+
+    const chapters = Object.entries(data).map(([key, value]) => ({ chapterName: key, lines: value }));
+
     // console.log({ chapters });
-    const text = chapters[currentChapterIndex]?.text || ''
-
-
-
-    const chunks = splitTextToSentences(text)
-    // console.log({ chunks });
+    const chunks = splitLinesToChunks(chapters[currentChapterIndex].lines) || []
+    console.log({ chunks });
 
 
 

@@ -13,9 +13,15 @@ function removeEmptyLines(lines) {
 function removeLinesWithNumbersOnly(lines) {
     return lines.filter(line => !/^\d+$/.test(line.trim()));
 }
+function fixWordsWithDash(lines) {
+    return lines.map(line => {
+        return line.replace(/(\w+)- (\w+)/g, '$1$2');
+    });
+}
 // Text parser for book content
 const arrayOfFunctions = [
     removeEmptyLines,
+    fixWordsWithDash,
     // removeLinesWithNumbersOnly,
     // removeNumbersAtTheEndOfLinesAfterDot,
 
@@ -42,10 +48,10 @@ function splitToChapters(lines) {
 
     return chapterSplits
 }
-function combineIncompleteSentencesInternal(lines, shouldRunOnImages = false) {
+function combineIncompleteSentencesInternal(lines) {
 
     for (let i = 0; i < lines.length; i++) {
-        const arrayOfLineEndings = ['.', ';', ':', '!', '?', ']', '}'];
+        const arrayOfLineEndings = ['.', ';', ':', '!', '?', ']', '}', "”"];
         const isEndsWithCapitalLetter = /[A-Z]$/.test(lines[i]);
         // const isEndsWithNumber = /\d$/.test(lines[i]);
         const isNOTEndsWithCaracterArray = arrayOfLineEndings.every(ending => !lines[i].endsWith(ending))
@@ -57,12 +63,9 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages = false) {
         if (isSentenceStartsWithImage) {
             // console.log(lines[i]);
         }
-        if (shouldRunOnImages && !isSentenceStartsWithImage) {
-            continue;
-        }
-        if (!shouldRunOnImages && isSentenceStartsWithImage) {
-            continue;
-        }
+        // if (lines[i + 1]?.startsWith('Image ')) {
+        //     continue
+        // }
         // const lastWordDoesDoesNotStartWithCapitalLetter = !/^[A-Z]/.test(lines[i].split(' ').pop());
         //sentence does not start with a number
         const sentenceDoesNotStartWithANumber = !/^\d:/.test(lines[i]);
@@ -96,10 +99,7 @@ function combineIncompleteSentencesInternal(lines, shouldRunOnImages = false) {
 
             for (let j = 1; j <= 2 && i + j < lines.length; j++) {
                 // small letter or any of this characters: (
-                if (lines[i + j].startsWith('Image ')) {
-                    continue
-                }
-                if (/^[a-z]|I|\(/.test(lines[i + j]) && !lines[i + j].startsWith('Image ')) {
+                if (/^[a-z]|^I\s|^\(/.test(lines[i + j])) {
                     // console.log("Line continues: ", lines[i + j]);
 
                     if (isEndsWithSlash) {
