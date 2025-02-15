@@ -17,7 +17,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     const [isInitialScrollComplete, setIsInitialScrollComplete] = useState(false);
     const [isCurrentChunkVisible, setIsCurrentChunkVisible] = useState(true);
     const [selectedText, setSelectedText] = useState('');
-    const [showSelectionFAB, setShowSelectionFAB] = useState(false);
+    const [showSelectionFAB, setShowSelectionFAB] = useState(true);
     const [questionPanel, setQuestionPanel] = useState(null);
 
     const theme = useTheme();
@@ -172,30 +172,34 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     useEffect(() => {
         const handleSelection = () => {
             const selection = window.getSelection();
+
             const text = selection.toString().trim();
+
             setSelectedText(text);
-            setShowSelectionFAB(text.length > 0);
+            // setShowSelectionFAB(text.length > 0);
         };
 
         document.addEventListener('selectionchange', handleSelection);
+
         return () => document.removeEventListener('selectionchange', handleSelection);
     }, []);
 
     const handleQuestionAction = (actionType, customQuestion = '') => {
-        // Get the last 3 sentences including the selected one
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        const selectedElement = range.startContainer.parentElement;
-        const chunkElement = selectedElement.closest('[id^="chunk-"]');
-        const chunkId = chunkElement?.id;
-        const currentIndex = chunkId ? parseInt(chunkId.split('-')[1]) : currentChunkIndex;
+        // // Get the last 3 sentences including the selected one
+        // const selection = window.getSelection();
 
-        // Get up to 2 previous chunks for context
-        const contextStartIndex = Math.max(0, currentIndex - 2);
-        const contextChunks = textChunks.slice(contextStartIndex, currentIndex + 1);
+        // const range = selection.getRangeAt(0);
+        // const selectedElement = range.startContainer.parentElement;
+        // const chunkElement = selectedElement.closest('[id^="chunk-"]');
+        // const chunkId = chunkElement?.id;
+        // const currentIndex = chunkId ? parseInt(chunkId.split('-')[1]) : currentChunkIndex;
+
+        // // Get up to 2 previous chunks for context
+        // const contextStartIndex = Math.max(0, currentIndex - 2);
+        const contextChunks = textChunks.slice(currentChunkIndex - 2, currentChunkIndex + 1);
 
         setQuestionPanel({
-            text: selectedText,
+            text: selectedText || textChunks[currentChunkIndex],
             type: actionType,
             question: customQuestion,
             context: {
@@ -206,7 +210,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
 
         // Clear selection after action
         window.getSelection().removeAllRanges();
-        setShowSelectionFAB(false);
+        // setShowSelectionFAB(false);
     };
 
     const scrollToCurrentChunk = () => {
@@ -324,7 +328,6 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
             )}
 
             <SelectionFAB
-                selectedText={selectedText}
                 visible={showSelectionFAB}
                 onAction={handleQuestionAction}
             />

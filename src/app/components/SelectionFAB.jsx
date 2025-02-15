@@ -42,7 +42,6 @@ export function SelectionFAB({ selectedText, onAction, visible }) {
                     right: 16,
                 }}
                 icon={<SpeedDialIcon />}
-                direction="left"
             >
                 {actions.map((action) => (
                     <SpeedDialAction

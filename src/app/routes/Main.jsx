@@ -149,7 +149,7 @@ export function Main() {
 
     // console.log({ chapters });
     const chunks = splitLinesToChunks(chapters[currentChapterIndex]?.lines || [])
-    console.log({ chunks });
+    // console.log({ chunks });
 
 
 
