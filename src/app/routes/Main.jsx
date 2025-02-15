@@ -49,7 +49,7 @@ export function Main() {
     // Remove the theme creation code from here since it's now in useAppThemes
 
     const [audioChunks, setAudioChunks] = useState({});
-    
+
     // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
     const [currentChapterIndex, setCurrentChapterIndex] = useState(getConfig('currentChapterIndex') || 0);
     const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({
@@ -67,8 +67,8 @@ export function Main() {
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
     const [selectedVoice, setSelectedVoice] = useState(getConfig('selectedVoice') || 'en-US-Neural2-A');
-    console.log({selectedVoice});
-    
+    console.log({ selectedVoice });
+
 
     useEffect(() => {
         setCurrentChunkIndex(currentChunkIndexByChapter[currentChapterIndex] || 0)
@@ -175,7 +175,7 @@ export function Main() {
         if (audioChunks[currentChunkIndex]?.audio && currentChunkIndex === chunks.length - 1) {
             audioChunks[currentChunkIndex].audio.pause();
         }
-        
+
     }
 
     // Add progress calculations
@@ -212,7 +212,7 @@ export function Main() {
             <SettingsContext.Provider value={{ settings, handleSettingsChange }}>
                 <div>
                     <div style={{
-                        height: '73vh',
+                        height: '74vh',
                         overflowY: 'auto',
                         borderBottom: '1px solid #eee'
                     }}>

@@ -99,26 +99,37 @@ export function AudioPlayer({
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto',  }}>
+        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto', }}>
             {/* Progress Display */}
-            <Typography
-                variant="subtitle1"
+            <Box
                 sx={{
-                    color: 'white',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 2,
                 }}
             >
                 <IconButton onClick={() => handleAudioAction(onPrevChapter)} sx={{ color: 'white' }}>
-                                        <KeyboardDoubleArrowLeft />
-                                    </IconButton>
-                {displayedText}
+                    <KeyboardDoubleArrowLeft />
+                </IconButton>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        color: 'white',
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}
+                >
+
+                    {displayedText}
+
+                </Typography>
                 <IconButton onClick={() => handleAudioAction(onNextChapter)} sx={{ color: 'white' }}>
-                                        <KeyboardDoubleArrowRight />
-                                    </IconButton>
-            </Typography>
+                    <KeyboardDoubleArrowRight />
+                </IconButton>
+            </Box>
 
             <Typography
                 variant="caption"
@@ -152,9 +163,9 @@ export function AudioPlayer({
                     </IconButton>
                 </Grid>
 
-                
+
                 <Grid item>
-                    
+
                     <IconButton onClick={() => handleAudioAction(onPrev)} sx={{ color: 'white' }}>
                         <SkipPreviousIcon />
                     </IconButton>
@@ -196,21 +207,21 @@ export function AudioPlayer({
                 </Grid> */}
 
                 <Grid item>
-                                    <IconButton 
-                                        onClick={handleBookmarkClick} 
-                                        sx={{
-                                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
-                                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
-                                            '&:hover': {
-                                                bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.2)': 'rgba(255, 255, 255, 0.1)'
-                                                }
-                                        }}
-                                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}>
-                                            <BookmarkIcon />
-                                    </IconButton>
-                                </Grid>
+                    <IconButton
+                        onClick={handleBookmarkClick}
+                        sx={{
+                            color: isCurrentSentenceBookmarked() ? '#1DB954' : 'white',
+                            bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                            '&:hover': {
+                                bgcolor: isCurrentSentenceBookmarked() ? 'rgba(29, 185, 84, 0.2)' : 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }}
+                        title={isCurrentSentenceBookmarked() ? "Remove bookmark" : "Add bookmark"}>
+                        <BookmarkIcon />
+                    </IconButton>
+                </Grid>
 
-                
+
 
                 {/* <Grid item>
                     
