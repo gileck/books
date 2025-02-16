@@ -5,7 +5,8 @@ import { Assistant, Home, People, Timeline, TrendingUp, Bookmark } from '@mui/ic
 export const Menu = ({ menuOpen, toggleDrawer, onRouteChanged }) => {
     const menuItems = [
         { text: 'Home', Icon: <Home />, route: '' },
-        { text: 'Bookmarks', Icon: <Bookmark />, route: 'bookmark-list' } // Add new menu item
+        { text: 'Bookmarks', Icon: <Bookmark />, route: 'bookmark-list' },
+        { text: 'History', Icon: <Timeline />, route: 'history' } // NEW: History menu item
     ];
 
     return (

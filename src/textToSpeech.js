@@ -4,13 +4,22 @@ const fs = require('fs');
 const util = require('util');
 const path = require('path');
 
+function getClient() {
+    try {
+        const keyBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+        const credentials = JSON.parse(Buffer.from(keyBase64, 'base64').toString('utf-8'));
+        const client = new textToSpeech.TextToSpeechClient({
+            credentials,
+        });
+    return client;
+    } catch (e) {
+        // console.log(e);
+        return null;
+    }
+    
+}
 
-const keyBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-const credentials = JSON.parse(Buffer.from(keyBase64, 'base64').toString('utf-8'));
-const client = new textToSpeech.TextToSpeechClient({
-    credentials,
-});
 
 function generateSSMLWithMarks(text) {
     const words = text.split(" ");
@@ -25,7 +34,10 @@ function generateSSMLWithMarks(text) {
 }
 
 export async function synthesizeSpeech(text, voiceId = 'en-US-Neural2-F') {
-    const textWithMarks = generateSSMLWithMarks(text)
+    if (!text) {
+        return null;
+    }
+    const textWithMarks = generateSSMLWithMarks(text);
 
     const request = {
         enableTimePointing: ['SSML_MARK'],
@@ -39,7 +51,16 @@ export async function synthesizeSpeech(text, voiceId = 'en-US-Neural2-F') {
         audioConfig: { audioEncoding: 'MP3' },
     };
 
+    const client = getClient();
+    if (!client) {
+        return null;
+    }
+
     const [response] = await client.synthesizeSpeech(request);
+
+    if (!response || !response.audioContent) {
+        return null
+    }
 
     return {
         audioContent: response.audioContent.toString('base64'),

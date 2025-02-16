@@ -3,6 +3,7 @@ import { localStorageAPI } from './localStorageAPI';
 import { AppContext } from './AppContext';
 import { useFetch } from '../useFetch';
 import { useBookmarks } from './hooks/useBookmarks';
+import { useReadingHistory } from '../hooks/useReadingHistory';
 
 function useQuestionBox() {
     const [isQuestionBoxOpen, setIsQuestionBoxOpen] = useState(false)
@@ -46,6 +47,12 @@ export function AppProvider({ children, setRoute, params, user }) {
     const alert = useAlert();
     const questionBox = useQuestionBox();
     const bookmarks = useBookmarks();
+    const readingHistory = useReadingHistory();
+
+    // NEW: expose a function to navigate to a sentence without adding it to history
+    const goToSentence = (chapterIndex, chunkIndex) => {
+        setRoute('main', { chapterIndex, chunkIndex });
+    };
 
     const contextValue = {
         params,
@@ -65,7 +72,10 @@ export function AppProvider({ children, setRoute, params, user }) {
             alert.setIsAlertOpen(false);
             alert.setIsErrorAlertOpen(false);
         },
-        bookmarks
+        bookmarks,
+        readingHistory,
+        // NEW: add the new navigation function to the context
+        goToSentence
     };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
