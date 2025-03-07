@@ -65,9 +65,11 @@ export function AudioPlayer({
     }, [audio, playbackSpeed, onEnded]);
 
     const handleAudioAction = (action) => {
-        if (!audio) return;
-        audio.pause();
-        audio.currentTime = 0;
+        // if (!audio) return;
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
         action();
     };
 

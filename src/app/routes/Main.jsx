@@ -1,5 +1,5 @@
 import { fetchWithCache, useFetch } from "@/useFetch"
-import { useEffect, useState, useMemo, useContext } from "react"
+import { useEffect, useState, useMemo, useContext, useRef } from "react"
 import { AudioPlayer } from "../components/AudioPlayer";
 import { MainTextContent } from "../components/MainTextContent"
 import EpubReader from "../components/EpubReader"
@@ -59,34 +59,35 @@ export function Main() {
     const { settings, handleSettingsChange } = useAppearanceSettings();
     const { appTheme, contentTheme } = useAppThemes(settings);
 
-    const { setRoute, params, bookmarks: { bookmarks, addBookmark, removeBookmark, isBookmarked } } = useContext(AppContext);
+    const { setRoute, params, bookmarks: { bookmarks, addBookmark, removeBookmark, isBookmarked }, readingHistory } = useContext(AppContext);
 
     const { chapterIndex: chapterIndexFromParams, chunkIndex: chunkIndexFromParams } = params || {};
 
-
-
-
-
-
-    // Remove the theme creation code from here since it's now in useAppThemes
-
     const [audioChunks, setAudioChunks] = useState({});
 
-    // const [currentChunkIndex, setCurrentChunkIndex] = useState(getConfig('currentChunkIndex') || 0);
     const [currentChapterIndex, setCurrentChapterIndex] = useState(Number(chapterIndexFromParams) || getConfig('currentChapterIndex') || 0);
     const [currentChunkIndexByChapter, setCurrentChunkIndexByChapter] = useState({
         [currentChapterIndex]: Number(chunkIndexFromParams) || getConfig('currentChunkIndex') || 0
     });
-    const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0
-    // console.log({ currentChunkIndex });
+    const currentChunkIndex = currentChunkIndexByChapter[currentChapterIndex] ?? getConfig('currentChunkIndex') ?? 0;
+
+    useEffect(() => {
+        if (chapterIndexFromParams !== undefined && chunkIndexFromParams !== undefined) {
+            setTimeout(() => {
+                setRoute('main', {});
+            }, 2000);
+        }
+    }, [chapterIndexFromParams, chunkIndexFromParams]);
+    
 
     const setCurrentChunkIndex = (index) => {
+        console.log({index});
+        
         setCurrentChunkIndexByChapter(prev => ({
             ...prev,
             [currentChapterIndex]: index
         }))
     }
-    // console.log({ currentChunkIndex });
 
     const [wordSpeed, setWordSpeed] = useState(getConfig('wordSpeed') || 0);
     const [playbackSpeed, setPlaybackSpeed] = useState(getConfig('playbackSpeed') || 1);
@@ -116,7 +117,6 @@ export function Main() {
     function onWordSpeedChanged(speed) {
         setWordSpeed(speed);
     }
-    // console.log({ currentChunkIndex });
     const { data } = useFetch('/chapters.json', {
         disableFetchInBackground: true,
         shouldUsecache: false
@@ -127,14 +127,6 @@ export function Main() {
         shouldUsecache: false
     })
 
-
-
-
-
-
-    // console.log({ data });
-    // const text = data.chapters ? data.chapters[currentChapterIndex].content.map(c => c.text).join(' ') : '';
-    // console.log(data);
     function markImages(lines) {
         return lines.map(line => {
             if (line.startsWith('Image ')) {
@@ -144,14 +136,9 @@ export function Main() {
         })
     }
 
-
     const chapters = Object.entries(data).map(([key, value]) => ({ chapterName: key, lines: value }));
 
-    // console.log({ chapters });
     const chunks = splitLinesToChunks(chapters[currentChapterIndex]?.lines || [])
-    // console.log({ chunks });
-
-
 
     useEffect(() => {
         if (currentChunkIndex >= chunks.length) return;
@@ -187,8 +174,19 @@ export function Main() {
         }
     }, [currentChunkIndex, chunks, selectedVoice]);
 
+    useEffect(() => {
+        const sentence = chunks[currentChunkIndex];
+        if (sentence) {
+            readingHistory.addHistory({
+                chapterIndex: currentChapterIndex,
+                chunkIndex: currentChunkIndex,
+                sentence
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentChunkIndex]);
+
     const handleChunkSelect = (index) => {
-        // Pause current audio if playing
         if (audioChunks[currentChunkIndex]?.audio) {
             audioChunks[currentChunkIndex].audio.pause();
             audioChunks[currentChunkIndex].audio.currentTime = 0;
@@ -197,7 +195,6 @@ export function Main() {
     };
 
     function onChunksFinished() {
-        // setCurrentChunkIndex(0)
     }
 
     function onAudioFinished() {
@@ -210,7 +207,6 @@ export function Main() {
 
     }
 
-    // Add progress calculations
     const progressMetrics = {
         current: currentChunkIndex + 1,
         total: chunks.length,
@@ -263,35 +259,14 @@ export function Main() {
                             />
                         </ThemeProvider>
                     </div>
-
-                    {chapterIndexFromParams !== undefined && chunkIndexFromParams !== undefined && (
-                        <Fab
-                            color="primary"
-                            variant="extended"
-                            onClick={() => {
-                                window.location.href = '/';
-                            }}
-                            sx={{
-                                position: 'fixed',
-                                bottom: '25vh',
-                                right: '25%',
-                                zIndex: 100000
-                            }}
-                        >
-                            <ReplyIcon sx={{ mr: 1 }} />
-                            Return to Current
-                        </Fab>
-                    )}
-
-                    {/* Audio player remains unchanged, using base theme */}
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '10px',
                         paddingTop: '2px',
-                        backgroundColor: '#282828',  // Back to dark background
-                        color: 'white',  // Always white text
+                        backgroundColor: '#282828',
+                        color: 'white',
                         position: 'fixed',
                         bottom: 0,
                         left: 0,
@@ -318,7 +293,6 @@ export function Main() {
                             selectedVoice={selectedVoice}
                             onVoiceChange={(voice) => {
                                 setSelectedVoice(voice);
-                                // Clear audio chunks to force regeneration with new voice
                                 setAudioChunks({});
                             }}
                             progressMetrics={progressMetrics}
