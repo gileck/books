@@ -1,34 +1,22 @@
 import { getResponseFromGpt } from "@/ai/ai";
+import { NextResponse } from 'next/server';
 
-export const config = {
-    maxDuration: 60,
-    api: {
-        bodyParser: {
-            sizeLimit: '1mb',
-        },
-        responseLimit: '4mb',
-    },
-};
+export const maxDuration = 60;
 
-export default async function handler(req, res) {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({ 
-            error: 'Method not allowed',
-            message: 'This endpoint only supports POST requests'
-        });
-    }
-
+export async function POST(request) {
     try {
-        const { text, question, context } = req.body;
+        const { text, question, context } = await request.json();
         
         if (!text || !question || !context) {
-            return res.status(400).json({ 
-                error: 'Bad request',
-                message: 'Missing required fields: text, question, or context'
-            });
+            return NextResponse.json(
+                { 
+                    error: 'Bad request',
+                    message: 'Missing required fields: text, question, or context'
+                },
+                { status: 400 }
+            );
         }
-
+        
         const prompt = `You are an expert literature analyst helping a reader understand a passage from a book they're reading. 
 
 In ${context.chapterName} of the book, here's the surrounding context to help you understand the passage better:
@@ -53,8 +41,9 @@ Please provide a clear, insightful analysis that helps the reader better underst
             model: '3'
         });
 
-        return res.status(200).json({ result, apiPrice });
-
+        return NextResponse.json({ result, apiPrice });
+        
+        // Logging code commented out as in the original
         // await sendLog(`
         //     AI: PersonalCoachAI
         //     User: ${user.username}
@@ -80,9 +69,9 @@ Please provide a clear, insightful analysis that helps the reader better underst
         // });
     } catch (error) {
         console.error('Error in AI question API:', error);
-        return res.status(500).json({ 
-            error: 'Internal server error',
-            message: 'An error occurred while processing your request'
-        });
+        return NextResponse.json(
+            { error: 'Failed to process request', message: error.message },
+            { status: 500 }
+        );
     }
 }

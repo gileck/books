@@ -15,6 +15,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
             setError(null);
             
             try {
+                console.log('Sending request to /api/ai/question');
                 const response = await fetch('/api/ai/question', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -27,12 +28,16 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                     })
                 });
 
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
+                    console.error('API error response:', errorData);
                     throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
                 }
 
                 const data = await response.json();
+                console.log('API success response received');
                 setAnswer(data.result);
             } catch (error) {
                 console.error('Error fetching AI answer:', error);
