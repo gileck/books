@@ -5,12 +5,15 @@ import { useState, useEffect } from 'react';
 export function TextQuestionPanel({ selectedText, question, questionType, onClose, open, context }) {
     const [answer, setAnswer] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!open) return;
 
         const fetchAnswer = async () => {
             setIsLoading(true);
+            setError(null);
+            
             try {
                 const response = await fetch('/api/ai/question', {
                     method: 'POST',
@@ -25,14 +28,16 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
                 }
 
                 const data = await response.json();
                 setAnswer(data.result);
             } catch (error) {
                 console.error('Error fetching AI answer:', error);
-                setAnswer('Sorry, there was an error getting the answer. Please try again.');
+                setError(error.message || 'Sorry, there was an error getting the answer. Please try again.');
+                setAnswer('');
             } finally {
                 setIsLoading(false);
             }
@@ -82,6 +87,10 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                         }}>
                             <CircularProgress />
                         </Box>
+                    ) : error ? (
+                        <Typography variant="body1" color="error" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {error}
+                        </Typography>
                     ) : (
                         <Typography variant="body1" color="text.primary" sx={{
                             whiteSpace: 'pre-wrap',
