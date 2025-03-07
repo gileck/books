@@ -24,6 +24,10 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
                 const data = await response.json();
                 setAnswer(data.result);
             } catch (error) {

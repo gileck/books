@@ -5,6 +5,11 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+    // Check if the request method is POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const { text, question, context } = req.body;
     const prompt = `You are an expert literature analyst helping a reader understand a passage from a book they're reading. 
 
