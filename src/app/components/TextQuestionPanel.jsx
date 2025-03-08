@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, IconButton, Box, CircularProgress, Paper, Fade, TextField, Button, Chip, Drawer, Tooltip, Menu, MenuItem, Avatar, InputAdornment, useTheme } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, IconButton, Box, CircularProgress, Paper, Fade, TextField, Button, Chip, Drawer, Tooltip, Menu, MenuItem, Avatar, InputAdornment, useTheme, useMediaQuery } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MinimizeIcon from '@mui/icons-material/Minimize';
 import SendIcon from '@mui/icons-material/Send';
@@ -20,6 +20,7 @@ const CHAT_HISTORY_KEY = 'books_ai_chat_history';
 export function TextQuestionPanel({ selectedText, question, questionType, onClose, open, context }) {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [answer, setAnswer] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -300,7 +301,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                 variant="body2"
                                 component="div"
                                 sx={{
-                                    fontSize: '0.9rem',
+                                    fontSize: isMobile ? '0.8rem' : '0.9rem',
                                     lineHeight: 1.4
                                 }}
                             >
@@ -357,7 +358,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                     variant="body2"
                                     component="div"
                                     sx={{
-                                        fontSize: '0.9rem',
+                                        fontSize: isMobile ? '0.8rem' : '0.9rem',
                                         lineHeight: 1.4,
                                         color: 'text.primary'
                                     }}
@@ -369,7 +370,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                         sx={{
                                             fontStyle: 'italic',
                                             color: isDarkMode ? 'text.secondary' : 'text.primary',
-                                            fontSize: '0.9rem',
+                                            fontSize: isMobile ? '0.8rem' : '0.9rem',
                                             lineHeight: 1.5,
                                             pl: 0.5
                                         }}
@@ -393,7 +394,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                     : '0 2px 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1)'
                             }}
                         >
-                            <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                            <Typography variant="body2" sx={{ fontSize: isMobile ? '0.8rem' : '0.9rem' }}>
                                 {message.content}
                             </Typography>
                         </Paper>
@@ -445,10 +446,10 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                         >
                             <Box
                                 sx={{
-                                    fontSize: '0.9rem',
+                                    fontSize: isMobile ? '0.8rem' : '0.9rem',
                                     color: 'text.primary',
                                     '& h3': {
-                                        fontSize: '1rem',
+                                        fontSize: isMobile ? '0.9rem' : '1rem',
                                         fontWeight: 600,
                                         mt: 1.5,
                                         mb: 1,
@@ -481,7 +482,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                         padding: '2px 4px',
                                         borderRadius: '4px',
                                         fontFamily: 'monospace',
-                                        fontSize: '0.85em'
+                                        fontSize: isMobile ? '0.75rem' : '0.85em'
                                     },
                                     '& pre': {
                                         backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.05)',
@@ -542,7 +543,7 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                 color={isDarkMode ? 'error.light' : 'error.dark'}
                                 sx={{
                                     whiteSpace: 'pre-wrap',
-                                    fontSize: '0.875rem',
+                                    fontSize: isMobile ? '0.8rem' : '0.875rem',
                                     textAlign: 'center'
                                 }}
                             >
@@ -585,16 +586,20 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
             PaperProps={{
                 elevation: 8,
                 sx: {
-                    borderRadius: 3,
+                    borderRadius: isMobile ? 2 : 3,
                     overflow: 'hidden',
-                    height: '80vh',
+                    height: isMobile ? '100vh' : '80vh',
+                    width: isMobile ? '100vw' : undefined,
+                    margin: isMobile ? 0 : undefined,
+                    maxWidth: isMobile ? '100%' : undefined,
                     display: 'flex',
                     flexDirection: 'column'
                 }
             }}
+            fullScreen={isMobile}
         >
             <DialogTitle sx={{
-                p: 2,
+                p: isMobile ? 1.5 : 2,
                 backgroundColor: isDarkMode ? 'primary.dark' : 'primary.main',
                 color: 'primary.contrastText',
                 display: 'flex',
@@ -604,8 +609,8 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                 borderColor: isDarkMode ? 'primary.light' : 'primary.dark'
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <SmartToyIcon />
-                    <Typography variant="subtitle1" fontWeight="medium">
+                    <SmartToyIcon sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }} />
+                    <Typography variant={isMobile ? "body1" : "subtitle1"} fontWeight="medium">
                         AI Chat Assistant
                     </Typography>
                 </Box>
@@ -688,8 +693,8 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                         flexDirection: 'column',
                         flexGrow: 1,
                         overflowY: 'auto',
-                        p: 3,
-                        gap: 3
+                        p: isMobile ? 1.5 : 3,
+                        gap: isMobile ? 2 : 3
                     }}
                 >
                     {chatHistory.length === 0 ? (
@@ -701,14 +706,14 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                                 justifyContent: 'center',
                                 height: '100%',
                                 opacity: isDarkMode ? 0.5 : 0.7,
-                                py: 3
+                                py: isMobile ? 2 : 3
                             }}
                         >
-                            <SmartToyIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2, opacity: 0.8 }} />
-                            <Typography variant="body1" color="text.secondary" align="center" sx={{ fontWeight: 500 }}>
+                            <SmartToyIcon sx={{ fontSize: isMobile ? 36 : 48, color: 'primary.main', mb: 2, opacity: 0.8 }} />
+                            <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" align="center" sx={{ fontWeight: 500 }}>
                                 Welcome to AI Chat Assistant
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
+                            <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" align="center" sx={{ mt: 1 }}>
                                 Select text and ask questions about it.
                                 <br />
                                 Your conversation history will be saved here.
@@ -729,9 +734,9 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                             alignItems: 'center',
                             gap: 2,
                             alignSelf: 'flex-start',
-                            ml: 4
+                            ml: isMobile ? 2 : 4
                         }}>
-                            <CircularProgress size={16} thickness={5} sx={{ color: 'secondary.main' }} />
+                            <CircularProgress size={isMobile ? 14 : 16} thickness={5} sx={{ color: 'secondary.main' }} />
                             <Typography variant="caption" color="text.secondary">
                                 AI is thinking...
                             </Typography>
@@ -761,20 +766,20 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
 
                 {/* Input area */}
                 <Box sx={{
-                    p: 2,
+                    p: isMobile ? 1.5 : 2,
                     borderTop: '1px solid',
                     borderColor: 'divider',
                     bgcolor: isDarkMode ? 'grey.900' : 'background.paper'
                 }}>
                     <Box sx={{
                         display: 'flex',
-                        gap: 1.5,
+                        gap: 1,
                         alignItems: 'flex-end'
                     }}>
                         <TextField
                             fullWidth
                             multiline
-                            maxRows={4}
+                            maxRows={isMobile ? 3 : 4}
                             placeholder="Type your message..."
                             value={customQuestion}
                             onChange={(e) => setCustomQuestion(e.target.value)}
@@ -783,11 +788,12 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                             size="small"
                             InputProps={{
                                 sx: {
-                                    borderRadius: 3,
+                                    borderRadius: isMobile ? 2 : 3,
                                     backgroundColor: isDarkMode ? 'grey.800' : 'grey.50',
                                     '&:hover': {
                                         backgroundColor: isDarkMode ? 'grey.700' : 'grey.100'
-                                    }
+                                    },
+                                    fontSize: isMobile ? '0.85rem' : '0.9rem'
                                 },
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -809,12 +815,12 @@ export function TextQuestionPanel({ selectedText, question, questionType, onClos
                             onClick={handleSendCustomQuestion}
                             sx={{
                                 minWidth: 'auto',
-                                width: 48,
-                                height: 40,
-                                borderRadius: 3
+                                width: isMobile ? 40 : 48,
+                                height: isMobile ? 36 : 40,
+                                borderRadius: isMobile ? 2 : 3
                             }}
                         >
-                            <SendIcon />
+                            <SendIcon sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }} />
                         </Button>
                     </Box>
                 </Box>
