@@ -5,18 +5,21 @@ export const maxDuration = 60;
 
 export async function POST(request) {
     try {
-        const { text, question, context } = await request.json();
-        
+        const { text, question, context, answerLength = 'medium' } = await request.json();
+
         if (!text || !question || !context) {
             return NextResponse.json(
-                { 
+                {
                     error: 'Bad request',
                     message: 'Missing required fields: text, question, or context'
                 },
                 { status: 400 }
             );
         }
-        
+
+        // Define length instructions based on answerLength parameter
+
+
         const prompt = `You are an expert literature analyst helping a reader understand a passage from a book they're reading. 
 
 In ${context.chapterName} of the book, here's the surrounding context to help you understand the passage better:
@@ -29,9 +32,11 @@ The reader has selected this specific passage and would like to understand it be
 ${text}
 """
 
-Their question about this passage is: ${question}
+Their question or request is: ${question}
 
-Please provide a clear, insightful analysis that helps the reader better understand this passage. Consider the context, themes, and significance within the chapter. If relevant, explain any literary devices, symbolism, or deeper meanings that might enhance their understanding.
+Keep your response concise and to the point, around 2-3 sentences.
+
+Please provide a clear, simple, insightful analysis that helps the reader better understand this passage. 
 `;
 
         const { result, apiPrice, modelToUse, usage, duration } = await getResponseFromGpt({
@@ -42,7 +47,7 @@ Please provide a clear, insightful analysis that helps the reader better underst
         });
 
         return NextResponse.json({ result, apiPrice });
-        
+
         // Logging code commented out as in the original
         // await sendLog(`
         //     AI: PersonalCoachAI

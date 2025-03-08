@@ -78,11 +78,11 @@ export function Main() {
             }, 2000);
         }
     }, [chapterIndexFromParams, chunkIndexFromParams]);
-    
+
 
     const setCurrentChunkIndex = (index) => {
-        console.log({index});
-        
+        // console.log({ index });
+
         setCurrentChunkIndexByChapter(prev => ({
             ...prev,
             [currentChapterIndex]: index
@@ -240,7 +240,7 @@ export function Main() {
             <SettingsContext.Provider value={{ settings, handleSettingsChange }}>
                 <div>
                     <div style={{
-                        height: '74vh',
+                        height: '70vh',
                         overflowY: 'auto',
                         borderBottom: '1px solid #eee'
                     }}>
@@ -260,6 +260,7 @@ export function Main() {
                         </ThemeProvider>
                     </div>
                     <div style={{
+                        height: '22vh',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -271,7 +272,6 @@ export function Main() {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: '19vh',
                         zIndex: 1000,
                         boxShadow: '0 -2px 8px rgba(0,0,0,0.1)'
                     }}>

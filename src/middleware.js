@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   // Log information about the request
-  console.log('Middleware processing request:', request.method, request.nextUrl.pathname);
-  
+  // console.log('Middleware processing request:', request.method, request.nextUrl.pathname);
+
   // Allow the request to continue
   return NextResponse.next();
 }

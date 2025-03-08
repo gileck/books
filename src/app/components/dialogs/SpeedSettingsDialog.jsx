@@ -1,16 +1,43 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography, IconButton, Slider, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Typography, IconButton, Slider, FormControl, InputLabel, Select, MenuItem, Divider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
 const voices = [
-    { id: 'en-US-Neural2-A', name: 'Female 1' },
-    { id: 'en-US-Neural2-C', name: 'Female 2' },
-    { id: 'en-US-Neural2-D', name: 'Male 1' },
-    { id: 'en-US-Neural2-F', name: 'Male 2' },
-    { id: 'en-US-Neural2-H', name: 'Female 3' },
-    { id: 'en-US-Neural2-I', name: 'Male 3' },
+    // US English Neural2 Voices (Premium)
+    { id: 'en-US-Neural2-A', name: 'US Female 1 (Premium)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Neural2-C', name: 'US Female 2 (Premium)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Neural2-D', name: 'US Male 1 (Premium)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Neural2-F', name: 'US Male 2 (Premium)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Neural2-G', name: 'US Female 3 (Premium)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Neural2-H', name: 'US Female 4 (Premium)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Neural2-I', name: 'US Male 3 (Premium)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Neural2-J', name: 'US Male 4 (Premium)', gender: 'Male', accent: 'US' },
+
+
+    // Standard Voices (Basic)
+    { id: 'en-US-Standard-A', name: 'US Female (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-B', name: 'US Male (Basic)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Standard-C', name: 'US Female 2 (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-D', name: 'US Male 2 (Basic)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Standard-E', name: 'US Female 3 (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-F', name: 'US Female 4 (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-G', name: 'US Female 5 (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-H', name: 'US Female 6 (Basic)', gender: 'Female', accent: 'US' },
+    { id: 'en-US-Standard-I', name: 'US Male 3 (Basic)', gender: 'Male', accent: 'US' },
+    { id: 'en-US-Standard-J', name: 'US Male 4 (Basic)', gender: 'Male', accent: 'US' },
+
 ];
+
+// Group voices by accent for better organization in the dropdown
+const groupedVoices = voices.reduce((acc, voice) => {
+    const key = voice.accent;
+    if (!acc[key]) {
+        acc[key] = [];
+    }
+    acc[key].push(voice);
+    return acc;
+}, {});
 
 export function SpeedSettingsDialog({
     open,
@@ -134,11 +161,20 @@ export function SpeedSettingsDialog({
                                 onChange={(e) => onVoiceChange(e.target.value)}
                                 label="Voice"
                             >
-                                {voices.map((voice) => (
-                                    <MenuItem key={voice.id} value={voice.id}>
-                                        {voice.name}
-                                    </MenuItem>
-                                ))}
+                                {Object.entries(groupedVoices).map(([accent, accentVoices]) => [
+                                    <MenuItem key={`group-${accent}`} disabled sx={{ opacity: 0.7, fontWeight: 'bold' }}>
+                                        {accent === 'US' ? 'United States' :
+                                            accent === 'UK' ? 'United Kingdom' :
+                                                accent === 'AU' ? 'Australia' :
+                                                    accent === 'IN' ? 'India' : accent} Voices
+                                    </MenuItem>,
+                                    ...accentVoices.map((voice) => (
+                                        <MenuItem key={voice.id} value={voice.id} sx={{ pl: 4 }}>
+                                            {voice.name}
+                                        </MenuItem>
+                                    )),
+                                    <Divider key={`divider-${accent}`} />
+                                ]).flat()}
                             </Select>
                         </FormControl>
                     </Grid>

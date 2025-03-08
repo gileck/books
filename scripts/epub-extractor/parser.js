@@ -171,9 +171,9 @@ function AddNewLineBeforeImages(lines) {
         if (/Image \d+\./.test(lines[i]) && !lines[i].startsWith('Image ')) {
             lines[i] = lines[i].replace(/(Image \d+\.)/g, '\n$1');
             const [line, newLine] = lines[i].split('\n');
-            console.log("line: ", line);
-            console.log("newLine: ", newLine);
-            console.log("----");
+            // console.log("line: ", line);
+            // console.log("newLine: ", newLine);
+            // console.log("----");
 
             lines[i] = line;
             //add the new line after the current line
