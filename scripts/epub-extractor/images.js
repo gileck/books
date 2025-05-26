@@ -120,9 +120,12 @@ function readEpubFiles(epubFiles) {
 
     const images = {}
     let imagesIndex = 1
-    imagesPaths.forEach((name) => {
-        images[`Image ${imagesIndex}`] = name
-        imagesIndex++
+    imagesPaths.forEach((name, index) => {
+        images[`Image ${imagesIndex}`] = images[`Image ${imagesIndex}`] || []
+        images[`Image ${imagesIndex}`].push(name)
+        if (imagesPaths[index + 1]?.includes("_1")) {
+            imagesIndex++
+        }
     });
     console.log(images);
     fs.writeFileSync(path.join(__dirname, './images.json'), JSON.stringify(images, null, 2), 'utf-8');

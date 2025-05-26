@@ -123,6 +123,87 @@ function combineIncompleteSentencesInternal(lines) {
     }
     return lines
 }
+
+function removeStudyNumbers(lines) {
+    // We need to track the study number sequence across all lines
+    let currentStudyNumber = 1;
+    
+    // Process each line while maintaining the sequence across lines
+    return lines.map(line => {
+        // Handle the case where study numbers appear immediately after a period
+        // We need to process these in a loop to handle multiple occurrences
+        let modified = true;
+        while (modified) {
+            modified = false;
+            // Pattern: word ending with period followed by a number (e.g., "sentence.1")
+            const regex = new RegExp(`\\.(${currentStudyNumber})\\b`, 'g');
+            if (regex.test(line)) {
+                line = line.replace(regex, '.');
+                currentStudyNumber++;
+                modified = true;
+            }
+        }
+        
+        // Handle the case where study numbers appear at the end of words (e.g., "end"1)
+        modified = true;
+        while (modified) {
+            modified = false;
+            // Pattern: word ending with a quote followed by a number (e.g., "end"1)
+            const wordEndRegex = new RegExp(`"(\\w+)"${currentStudyNumber}\\b`, 'g');
+            if (wordEndRegex.test(line)) {
+                line = line.replace(wordEndRegex, '"$1"');
+                currentStudyNumber++;
+                modified = true;
+            }
+        }
+        
+        // Split the line into words and process each word
+        const words = line.split(' ');
+        const processedWords = [];
+        
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            const prevWord = i > 0 ? words[i-1] : '';
+            
+            // Skip study numbers that follow "Image"
+            if (prevWord === 'Image') {
+                processedWords.push(word);
+                continue;
+            }
+            
+            // Check for different formats of study numbers
+            // Format: just the number
+            if (word === currentStudyNumber.toString()) {
+                currentStudyNumber++;
+                // Skip this word (remove the study number)
+            }
+            // Format: number followed by period (e.g., "1.")
+            else if (word === currentStudyNumber.toString() + '.') {
+                currentStudyNumber++;
+                processedWords.push('.'); // Keep the period, remove the number
+            }
+            // Format: period followed by number (e.g., ".1")
+            else if (word === '.' + currentStudyNumber.toString()) {
+                currentStudyNumber++;
+                processedWords.push('.'); // Keep the period, remove the number
+            }
+            // Check for study number at the end of a word (e.g., "word1")
+            else if (word.endsWith(currentStudyNumber.toString()) && 
+                    !word.startsWith(currentStudyNumber.toString()) && 
+                    /\D\d+$/.test(word)) {
+                const numberPart = currentStudyNumber.toString();
+                processedWords.push(word.slice(0, -numberPart.length));
+                currentStudyNumber++;
+            }
+            else {
+                processedWords.push(word); // Keep non-study numbers and other words
+            }
+        }
+        
+        // Join back to a line
+        return processedWords.join(' ');
+    });
+}
 const parseTextToJSON = (text) => {
     let lines = text.split('\n').map(line => line.trim());
     for (const func of arrayOfFunctions) {
@@ -130,12 +211,11 @@ const parseTextToJSON = (text) => {
     }
     const chapters = splitToChapters(lines);
     return Object.entries(chapters).reduce((acc, [key, value]) => {
-        acc[key] = combineIncompleteSentencesInternal(value)
+        acc[key] = combineIncompleteSentencesInternal(removeStudyNumbers(value))
         return acc
     }, {})
 
 
 };
 
-module.exports = { parseTextToJSON };
-
+module.exports = { parseTextToJSON, removeStudyNumbers };

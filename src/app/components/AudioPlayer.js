@@ -102,7 +102,7 @@ export function AudioPlayer({
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto', }}>
+        <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto', pb: 0 }}>
             {/* Progress Display */}
             <Box
                 sx={{
@@ -181,7 +181,11 @@ export function AudioPlayer({
                             borderRadius: '50%',
                             bgcolor: '#1DB954',
                             color: 'white',
-                            '&:hover': { bgcolor: '#1ed760' }
+                            '&:hover': { bgcolor: '#1ed760' },
+                            padding: '12px',
+                            '& .MuiSvgIcon-root': {
+                                fontSize: '2rem'
+                            }
                         }}
                     >
                         {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}

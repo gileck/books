@@ -1,11 +1,14 @@
-import { Box, Slider, CircularProgress, Fab } from '@mui/material';
+import { Box, Slider, CircularProgress, Fab, Tooltip } from '@mui/material';
 import VerticalAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
+import ChatIcon from '@mui/icons-material/Chat';
+import HelpIcon from '@mui/icons-material/Help';
+import WhyIcon from '@mui/icons-material/Psychology';
+import CustomIcon from '@mui/icons-material/Create';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { ReaderContent } from './ReaderContent';
 import { useTheme } from '@mui/material/styles';
 import { useSettings } from '../contexts/SettingsContext';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { SelectionFAB } from './SelectionFAB';
 import { TextQuestionPanel } from './TextQuestionPanel';
 
 const WINDOW_SIZE = 10; // Number of sentences to show above and below
@@ -19,6 +22,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
     const [selectedText, setSelectedText] = useState('');
     const [showSelectionFAB, setShowSelectionFAB] = useState(true);
     const [questionPanel, setQuestionPanel] = useState(null);
+    // const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
     const theme = useTheme();
     const { settings } = useSettings();
@@ -207,10 +211,29 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                 contextText: contextChunks.join(' ')
             }
         });
+        // setIsPanelMinimized(false);
 
         // Clear selection after action
         window.getSelection().removeAllRanges();
         // setShowSelectionFAB(false);
+    };
+
+    const handleOpenChat = () => {
+        // If there's no specific action, just open the chat panel with the current text
+        const text = selectedText || textChunks[currentChunkIndex];
+        const contextChunks = textChunks.slice(currentChunkIndex - 2, currentChunkIndex + 1);
+
+        setQuestionPanel({
+            text: text,
+            context: {
+                chapterName: `Chapter ${currentChapterIndex}`,
+                contextText: contextChunks.join(' ')
+            }
+        });
+    };
+
+    const handleChatClose = (event) => {
+        setQuestionPanel(null);
     };
 
     const scrollToCurrentChunk = () => {
@@ -318,7 +341,7 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                     sx={{
                         position: 'fixed',
                         bottom: '25vh',  // Adjust to be above the audio player
-                        right: '5%',
+                        left: '5%',
                         transform: 'translateX(-50%)',
                         zIndex: 100000
                     }}
@@ -327,10 +350,22 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                 </Fab>
             )}
 
-            <SelectionFAB
-                visible={showSelectionFAB}
-                onAction={handleQuestionAction}
-            />
+            {/* Chat FAB - Show when chat panel is not open or when it's minimized */}
+            {(!questionPanel) && (
+                <Fab
+                    color="primary"
+                    size="medium"
+                    onClick={handleOpenChat}
+                    sx={{
+                        position: 'fixed',
+                        bottom: '22vh',
+                        right: 16,
+                        zIndex: 100000
+                    }}
+                >
+                    <ChatIcon />
+                </Fab>
+            )}
 
             <TextQuestionPanel
                 open={!!questionPanel}
@@ -338,37 +373,39 @@ export function MainTextContent({ images, wordSpeed, timepoints, audio, currentC
                 questionType={questionPanel?.type}
                 question={questionPanel?.question}
                 context={questionPanel?.context}
-                onClose={() => setQuestionPanel(null)}
+                onClose={handleChatClose}
             />
         </Box>
     );
 }
 
-function getImageSrc(images, text) {
+function getImageSrcArray(images, text) {
     const imageFromText = text.match(/Image \d+\./)
     const imageKey = imageFromText && imageFromText[0]
     const imageIndex = imageKey && imageKey.split('.')[0]
     if (imageIndex && images[imageIndex]) {
-        return `/images/${images[imageIndex]}`
+        return images[imageIndex].map((image) => `/images/${image}`).reverse()
     } else {
         console.log('Image not found:', { text, imageIndex, imageFromText, images });
         return null
     }
-
-    return null
 }
 function ImageBox({ render, images, text }) {
+    const imagesSrc = getImageSrcArray(images, text)
     return <>
-        <img
-
-            src={getImageSrc(images, text)}
-            alt={text}
-            style={{
-                width: '100%',
-                height: 'auto',
-                marginBottom: '20px'
-            }}
-        />
+        {
+            imagesSrc && imagesSrc.map((src) => (
+                <img
+                    src={src}
+                    alt={text}
+                    style={{
+                        width: '100%',
+                        height: 'auto',
+                        marginBottom: '20px'
+                    }}
+                />
+            ))
+        }
         <Box
             sx={{
                 border: '1px solid gray',
